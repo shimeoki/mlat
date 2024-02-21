@@ -1,0 +1,85 @@
+package matrix
+
+import (
+	"bufio"
+	"bytes"
+	"errors"
+	"io"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func ReadSlow(path string) ([][]float64, error) {
+	rows, cols, err := getRowsCols(path)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	matrix, memory, _ := Malloc[float64](rows, cols)
+	scanner := bufio.NewScanner(file)
+	for i := range rows {
+		matrix[i] = memory[(i * cols):(i + 1) * cols]
+		scanner.Scan()
+		fields := strings.Fields(scanner.Text())
+		for j, field := range fields {
+			matrix[i][j], _ = strconv.ParseFloat(field, 64)
+		}
+	}
+
+	return matrix, nil
+}
+
+func getLinesCount(path string) (int, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	buffer := make([]byte, 1024)
+	count := 0
+	separator := []byte{'\n'}
+
+	for {
+		n, err := file.Read(buffer)
+		count += bytes.Count(buffer[:n], separator)
+
+		switch {
+		case err == io.EOF:
+			return count, nil
+		case err != nil:
+			return count, err
+		}
+	}
+}
+
+func getRowsCols(path string) (int, int, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer file.Close()
+
+	rows, cols := 0, 0
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fields := strings.Fields(scanner.Text())
+		if cols == 0 {
+			cols = len(fields)
+		} else if cols != len(fields) {
+			return 0, 0, errors.New("file is not a matrix")
+		}
+
+		rows++
+	}
+
+	return rows, cols, nil
+}
