@@ -6,12 +6,16 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
+	// "fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/shimeoki/mlat/internal/matrix"
 	"strconv"
 )
+
+type UI struct {
+
+}
 
 func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 	table := widget.NewTableWithHeaders(
@@ -78,6 +82,7 @@ func getOptions() *fyne.Container {
 	options.Add(label)
 
 	augmented := widget.NewCheck("Augmented", func(bool) {})
+	augmented.Disable()
 	options.Add(augmented)
 
 	validator := func(s string) error {
@@ -86,22 +91,26 @@ func getOptions() *fyne.Container {
 	}
 
 	rows := widget.NewEntry()
-	rows.SetPlaceHolder("Enter Rows...")
+	rows.SetPlaceHolder("Rows...")
 	rows.Validator = validator
+	rows.Disable()
 	options.Add(rows)
 
 	cols := widget.NewEntry()
-	cols.SetPlaceHolder("Enter Columns...")
+	cols.SetPlaceHolder("Columns...")
 	cols.Validator = validator
+	cols.Disable()
 	options.Add(cols)
 
 	solution := widget.NewSelect(
-		[]string{"default"},
+		[]string{"Calculate determinant(s)"},
 		func(string) {},
 	)
+	solution.SetSelectedIndex(0)
+	solution.Disable()
 	options.Add(solution)
 
-	options.Add(layout.NewSpacer())
+	// options.Add(layout.NewSpacer())
 
 	return container.NewPadded(options)
 }
