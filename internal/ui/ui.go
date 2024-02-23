@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"strconv"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -11,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/shimeoki/mlat/internal/matrix"
+	"strconv"
 )
 
 func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
@@ -36,18 +36,17 @@ func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 	}
 	table.UpdateHeader = func(id widget.TableCellID, object fyne.CanvasObject) {
 		var text string
-		
+
 		if id.Row == -1 && id.Col == -1 {
 			text = ""
 		} else if id.Row == -1 {
-			text = fmt.Sprint(id.Col+1)
+			text = fmt.Sprint(id.Col + 1)
 		} else {
-			text = fmt.Sprint(id.Row+1)
+			text = fmt.Sprint(id.Row + 1)
 		}
 
 		object.(*widget.Label).SetText(text)
 	}
-
 
 	return table
 }
@@ -120,7 +119,7 @@ func getCenter[number matrix.Number](mx *matrix.Matrix[number]) *fyne.Container 
 }
 
 func getBottomRow() *fyne.Container {
-	row := container.NewHBox()
+	row := container.NewGridWithRows(1)
 
 	importButton := widget.NewButtonWithIcon(
 		"Import Matrix",
@@ -136,10 +135,10 @@ func getBottomRow() *fyne.Container {
 	)
 	row.Add(exportButton)
 
-	row.Add(layout.NewSpacer())
+	// row.Add(layout.NewSpacer())
 
 	answerEntry := widget.NewEntry()
-	answerEntry.SetPlaceHolder("Answer")
+	answerEntry.SetPlaceHolder("Answer...")
 	answerEntry.Disable()
 
 	answerCopy := widget.NewButtonWithIcon(
