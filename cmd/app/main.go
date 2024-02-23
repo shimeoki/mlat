@@ -4,12 +4,15 @@ import (
 	"fmt"
 	// "time"
 	"github.com/shimeoki/mlat/internal/matrix"
+	"github.com/shimeoki/mlat/internal/ui"
 )
 
 func main() {
-	testRead()
-	// matrix, _ := matrix.NewMatrix[int](13, 14, true)
-	// matrix.FillRandom(10)
+	// testRead()
+	matrix, _ := matrix.NewMatrix[int](10, 10, false)
+	matrix.FillRandom(10)
+
+	ui.RunUI(matrix)
 
 	// fmt.Println(matrix)
 	// fmt.Println()
