@@ -12,8 +12,10 @@ func main() {
 	matrix, _ := matrix.NewMatrix[int](10, 10, false)
 	matrix.FillRandom(10)
 
-	ui.RunUI(matrix)
-
+	i := ui.MakeUI[int]()
+	i.Matrix = matrix
+	i.Table.Refresh()
+	
 	// fmt.Println(matrix)
 	// fmt.Println()
 

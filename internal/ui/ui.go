@@ -7,19 +7,27 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	// "fyne.io/fyne/v2/layout"
+	"strconv"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/shimeoki/mlat/internal/matrix"
-	"strconv"
 )
 
-type UI struct {
-
+type UI[number matrix.Number] struct {
+	Matrix *matrix.Matrix[number]
+	Table fyne.Widget
 }
 
-func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
+func createTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
+	// if mx == nil {
+	// 	mx, _ = matrix.NewMatrix[number](1, 1, false)
+	// }
+
 	table := widget.NewTableWithHeaders(
 		func() (int, int) {
+			if mx == nil {
+				return 0, 0
+			}
 			return mx.Shape[0], mx.Shape[1]
 		},
 		func() fyne.CanvasObject {
@@ -28,7 +36,13 @@ func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 			return object
 		},
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
-			object.(*widget.Entry).SetText(fmt.Sprintf("%v", mx.Data[cell.Row][cell.Col]))
+			var text string
+			if mx == nil {
+				text = "nil"
+			} else {
+				text = fmt.Sprintf("%v", mx.Data[cell.Row][cell.Col])
+			}
+			object.(*widget.Entry).SetText(text)
 		},
 	)
 
@@ -55,25 +69,27 @@ func newTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 	return table
 }
 
-func RunUI[number matrix.Number](mx *matrix.Matrix[number]) {
+func MakeUI[number matrix.Number]() *UI[number] {
 	a := app.New()
 	w := a.NewWindow("mlat")
+	
+	ui := &UI[number]{}
+	ui.Matrix = nil
+	ui.Table = createTable[number](ui.Matrix)
 
-	// table := NewTable(mx)
-	// table.Resize(fyne.NewSize(440, 440))
-
-	// tableContainer := container.NewPadded()
-
-	// tableContainer.Resize(fyne.NewSize(440, 440))
-
-	// mainContainer := container.NewWithoutLayout(tableContainer)
-	// mainContainer.Resize(fyne.NewSize(1000, 1000))
-
-	w.SetContent(getContent(mx))
+	tableContaner := container.NewPadded(ui.Table)
+	optionsContainer := createOptions()
+	actionsContainer := createActions()
+	mainContainer := container.NewBorder(
+		nil, actionsContainer, optionsContainer, nil, tableContaner,
+	)
+	w.SetContent(mainContainer)
 	w.ShowAndRun()
+
+	return ui
 }
 
-func getOptions() *fyne.Container {
+func createOptions() *fyne.Container {
 	options := container.NewVBox()
 
 	label := canvas.NewText("Options", theme.ForegroundColor())
@@ -115,19 +131,7 @@ func getOptions() *fyne.Container {
 	return container.NewPadded(options)
 }
 
-func getTable[number matrix.Number](mx *matrix.Matrix[number]) *fyne.Container {
-	table := newTable(mx)
-	return container.NewPadded(table)
-}
-
-func getCenter[number matrix.Number](mx *matrix.Matrix[number]) *fyne.Container {
-	options := getOptions()
-	table := getTable(mx)
-	center := container.NewBorder(nil, nil, options, nil, table)
-	return container.NewPadded(center)
-}
-
-func getBottomRow() *fyne.Container {
+func createActions() *fyne.Container {
 	row := container.NewGridWithRows(1)
 
 	importButton := widget.NewButtonWithIcon(
@@ -146,6 +150,12 @@ func getBottomRow() *fyne.Container {
 
 	// row.Add(layout.NewSpacer())
 
+	answerCalculate := widget.NewButtonWithIcon(
+		"Calculate",
+		theme.GridIcon(),
+		func() {},
+	)
+
 	answerEntry := widget.NewEntry()
 	answerEntry.SetPlaceHolder("Answer...")
 	answerEntry.Disable()
@@ -159,15 +169,10 @@ func getBottomRow() *fyne.Container {
 	answerStatus := widget.NewProgressBarInfinite()
 	answerStatus.Stop()
 
+	row.Add(answerCalculate)
 	row.Add(answerCopy)
 	row.Add(answerEntry)
 	row.Add(answerStatus)
 
 	return container.NewPadded(row)
-}
-
-func getContent[number matrix.Number](mx *matrix.Matrix[number]) *fyne.Container {
-	center := getCenter(mx)
-	bottom := getBottomRow()
-	return container.NewBorder(nil, bottom, nil, nil, center)
 }
