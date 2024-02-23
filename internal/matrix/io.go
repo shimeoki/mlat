@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -25,7 +26,7 @@ func ReadSlow(path string) ([][]float64, error) {
 	matrix, memory, _ := Malloc[float64](rows, cols)
 	scanner := bufio.NewScanner(file)
 	for i := range rows {
-		matrix[i] = memory[(i * cols):(i + 1) * cols]
+		matrix[i] = memory[(i * cols) : (i+1)*cols]
 		scanner.Scan()
 		fields := strings.Fields(scanner.Text())
 		for j, field := range fields {
@@ -34,6 +35,28 @@ func ReadSlow(path string) ([][]float64, error) {
 	}
 
 	return matrix, nil
+}
+
+func Write[number Number](path string, matrix [][]number) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	var sb strings.Builder
+
+	for _, row := range matrix {
+		sb.WriteString(
+			strings.Trim(strings.Replace(fmt.Sprint(row), " ", " ", -1), "[]"),
+		)
+		sb.WriteByte('\n')
+	}
+
+	file.WriteString(sb.String())
+
+	return nil
 }
 
 func getLinesCount(path string) (int, error) {

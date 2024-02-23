@@ -22,11 +22,18 @@ func main() {
 }
 
 func testRead() {
-	matrix, err := matrix.ReadSlow("test/01.txt")
+	mx, err := matrix.ReadSlow("test/01.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(matrix)
+	matrix.Write("test/01-copy.txt", mx)
+	mx, err = matrix.ReadSlow("test/01-copy.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	
+	fmt.Println(mx)
 }
