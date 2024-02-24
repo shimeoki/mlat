@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	// "fyne.io/fyne/v2/layout"
 	"strconv"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -14,21 +13,38 @@ import (
 )
 
 type UI[number matrix.Number] struct {
+	TableContainer *fyne.Container
+	Table *widget.Table
 	Matrix *matrix.Matrix[number]
-	Table fyne.Widget
+
+	OptionsContainer *fyne.Container
+	OptionsLabel *canvas.Text
+	OptionsAugmented *widget.Check
+	OptionsRows *widget.Entry
+	OptionsCols *widget.Entry
+	OptionsSolution *widget.Select
+	
+	ActionsContainer *fyne.Container
+	ActionsImport *widget.Button
+	ActionsExport *widget.Button
+	ActionsCalculate *widget.Button
+	ActionsCopy *widget.Button
+	ActionsAnswer *widget.Entry
+	ActionsStatus *widget.ProgressBarInfinite
+
+	MainContainer *fyne.Container
+
+	Window fyne.Window
+	App fyne.App
 }
 
-func createTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
-	// if mx == nil {
-	// 	mx, _ = matrix.NewMatrix[number](1, 1, false)
-	// }
-
+func (p *UI[number]) createTable() {
 	table := widget.NewTableWithHeaders(
 		func() (int, int) {
-			if mx == nil {
+			if p.Matrix == nil {
 				return 0, 0
 			}
-			return mx.Shape[0], mx.Shape[1]
+			return p.Matrix.Shape[0], p.Matrix.Shape[1]
 		},
 		func() fyne.CanvasObject {
 			object := widget.NewEntry()
@@ -37,15 +53,14 @@ func createTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 		},
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
 			var text string
-			if mx == nil {
+			if p.Matrix == nil {
 				text = "nil"
 			} else {
-				text = fmt.Sprintf("%v", mx.Data[cell.Row][cell.Col])
+				text = fmt.Sprintf("%v", p.Matrix.Data[cell.Row][cell.Col])
 			}
 			object.(*widget.Entry).SetText(text)
 		},
 	)
-
 	table.CreateHeader = func() fyne.CanvasObject {
 		object := widget.NewLabel("header")
 		object.TextStyle.Bold = true
@@ -66,113 +81,111 @@ func createTable[number matrix.Number](mx *matrix.Matrix[number]) fyne.Widget {
 		object.(*widget.Label).SetText(text)
 	}
 
-	return table
+	p.Table = table
+	p.TableContainer = container.NewPadded(p.Table)
 }
 
 func MakeUI[number matrix.Number]() *UI[number] {
-	a := app.New()
-	w := a.NewWindow("mlat")
-	
 	ui := &UI[number]{}
 	ui.Matrix = nil
-	ui.Table = createTable[number](ui.Matrix)
-
-	tableContaner := container.NewPadded(ui.Table)
-	optionsContainer := createOptions()
-	actionsContainer := createActions()
-	mainContainer := container.NewBorder(
-		nil, actionsContainer, optionsContainer, nil, tableContaner,
+	
+	ui.App = app.New()
+	ui.Window = ui.App.NewWindow("mlat")
+	
+	ui.createTable()
+	ui.createOptions()
+	ui.createActions()
+	ui.MainContainer = container.NewBorder(
+		nil, ui.ActionsContainer, ui.OptionsContainer, nil, ui.TableContainer,
 	)
-	w.SetContent(mainContainer)
-	w.ShowAndRun()
+	ui.Window.SetContent(ui.MainContainer)
 
 	return ui
 }
 
-func createOptions() *fyne.Container {
-	options := container.NewVBox()
+func (p *UI[_]) RunUI() {
+	p.Window.ShowAndRun()
+}
 
-	label := canvas.NewText("Options", theme.ForegroundColor())
-	label.TextStyle.Bold = true
-	label.TextSize = 24
-	options.Add(label)
+func (p *UI[_]) createOptions() {
+	p.OptionsContainer = container.NewVBox()
 
-	augmented := widget.NewCheck("Augmented", func(bool) {})
-	augmented.Disable()
-	options.Add(augmented)
+	p.OptionsLabel = canvas.NewText("Options", theme.ForegroundColor())
+	p.OptionsLabel.TextStyle.Bold = true
+	p.OptionsLabel.TextSize = 24
+	p.OptionsContainer.Add(p.OptionsLabel)
+
+	p.OptionsAugmented = widget.NewCheck("Augmented", func(bool) {})
+	p.OptionsAugmented.Disable()
+	p.OptionsContainer.Add(p.OptionsAugmented)
 
 	validator := func(s string) error {
 		_, err := strconv.ParseInt(s, 10, 64)
 		return err
 	}
 
-	rows := widget.NewEntry()
-	rows.SetPlaceHolder("Rows...")
-	rows.Validator = validator
-	rows.Disable()
-	options.Add(rows)
+	p.OptionsRows = widget.NewEntry()
+	p.OptionsRows.SetPlaceHolder("Rows...")
+	p.OptionsRows.Validator = validator
+	p.OptionsRows.Disable()
+	p.OptionsContainer.Add(p.OptionsRows)
 
-	cols := widget.NewEntry()
-	cols.SetPlaceHolder("Columns...")
-	cols.Validator = validator
-	cols.Disable()
-	options.Add(cols)
+	p.OptionsCols = widget.NewEntry()
+	p.OptionsCols.SetPlaceHolder("Columns...")
+	p.OptionsCols.Validator = validator
+	p.OptionsCols.Disable()
+	p.OptionsContainer.Add(p.OptionsCols)
 
-	solution := widget.NewSelect(
+	p.OptionsSolution = widget.NewSelect(
 		[]string{"Calculate determinant(s)"},
 		func(string) {},
 	)
-	solution.SetSelectedIndex(0)
-	solution.Disable()
-	options.Add(solution)
+	p.OptionsSolution.SetSelectedIndex(0)
+	p.OptionsSolution.Disable()
+	p.OptionsContainer.Add(p.OptionsSolution)
 
-	// options.Add(layout.NewSpacer())
-
-	return container.NewPadded(options)
+	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
 }
 
-func createActions() *fyne.Container {
-	row := container.NewGridWithRows(1)
+func (p *UI[_]) createActions() {
+	p.ActionsContainer = container.NewGridWithRows(1)
 
-	importButton := widget.NewButtonWithIcon(
+	p.ActionsImport = widget.NewButtonWithIcon(
 		"Import Matrix",
 		theme.UploadIcon(),
 		func() {},
 	)
-	row.Add(importButton)
 
-	exportButton := widget.NewButtonWithIcon(
+	p.ActionsExport = widget.NewButtonWithIcon(
 		"Export Matrix",
 		theme.DownloadIcon(),
 		func() {},
 	)
-	row.Add(exportButton)
 
-	// row.Add(layout.NewSpacer())
-
-	answerCalculate := widget.NewButtonWithIcon(
+	p.ActionsCalculate = widget.NewButtonWithIcon(
 		"Calculate",
 		theme.GridIcon(),
 		func() {},
 	)
 
-	answerEntry := widget.NewEntry()
-	answerEntry.SetPlaceHolder("Answer...")
-	answerEntry.Disable()
+	p.ActionsAnswer = widget.NewEntry()
+	p.ActionsAnswer.SetPlaceHolder("Answer...")
+	p.ActionsAnswer.Disable()
 
-	answerCopy := widget.NewButtonWithIcon(
+	p.ActionsCopy = widget.NewButtonWithIcon(
 		"",
 		theme.ContentCopyIcon(),
 		func() {},
 	)
 
-	answerStatus := widget.NewProgressBarInfinite()
-	answerStatus.Stop()
+	p.ActionsStatus = widget.NewProgressBarInfinite()
+	p.ActionsStatus.Stop()
 
-	row.Add(answerCalculate)
-	row.Add(answerCopy)
-	row.Add(answerEntry)
-	row.Add(answerStatus)
-
-	return container.NewPadded(row)
+	p.ActionsContainer.Add(p.ActionsImport)
+	p.ActionsContainer.Add(p.ActionsExport)
+	p.ActionsContainer.Add(p.ActionsCalculate)
+	p.ActionsContainer.Add(p.ActionsCopy)
+	p.ActionsContainer.Add(p.ActionsAnswer)
+	p.ActionsContainer.Add(p.ActionsStatus)
+	p.ActionsContainer = container.NewPadded(p.ActionsContainer)
 }
