@@ -23,7 +23,7 @@ type Matrix[number Number] struct {
 	Roots        []float64
 }
 
-func NewMatrix[number Number](rows, cols int, augmented bool) (*Matrix[number], error) {
+func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*Matrix[number], error) {
 	if rows <= 0 || cols <= 0 {
 		return nil, errors.New("shape is invalid")
 	}
@@ -36,6 +36,24 @@ func NewMatrix[number Number](rows, cols int, augmented bool) (*Matrix[number], 
 
 	// return pointer to new matrix
 	shape := [2]int{rows, cols}
+	var t [0]number
+	return &Matrix[number]{
+		matrix,
+		reflect.TypeOf(t).Elem(),
+		shape,
+		augmented,
+		isSquare(augmented, shape),
+		makeDets[number](augmented, shape[1]),
+		makeRoots(augmented, shape[1]),
+	}, nil
+}
+
+func NewMatrix[number Number](matrix [][]number, augmented bool) (*Matrix[number], error) {
+	if matrix == nil {
+		return nil, nil
+	}
+
+	shape := [2]int{len(matrix), len(matrix[0])}
 	var t [0]number
 	return &Matrix[number]{
 		matrix,

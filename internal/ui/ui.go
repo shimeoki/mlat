@@ -8,16 +8,17 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	
+
 	"github.com/shimeoki/mlat/internal/matrix"
 )
 
-type GUI[number matrix.Number] struct {
+type GUI struct {
 	TableContainer *fyne.Container
 	Table          *widget.Table
-	Matrix         *matrix.Matrix[number]
+	Matrix         *matrix.Matrix[float64]
 
 	OptionsContainer *fyne.Container
 	OptionsLabel     *canvas.Text
@@ -26,13 +27,15 @@ type GUI[number matrix.Number] struct {
 	OptionsCols      *widget.Entry
 	OptionsSolution  *widget.Select
 
-	ActionsContainer *fyne.Container
-	ActionsImport    *widget.Button
-	ActionsExport    *widget.Button
-	ActionsCalculate *widget.Button
-	ActionsCopy      *widget.Button
-	ActionsAnswer    *widget.Entry
-	ActionsStatus    *widget.ProgressBarInfinite
+	ActionsContainer    *fyne.Container
+	ActionsImport       *widget.Button
+	ActionsImportDialog *dialog.FileDialog
+	ActionsExport       *widget.Button
+	ActionsExportDialog *dialog.FileDialog
+	ActionsCalculate    *widget.Button
+	ActionsCopy         *widget.Button
+	ActionsAnswer       *widget.Entry
+	ActionsStatus       *widget.ProgressBarInfinite
 
 	MainContainer *fyne.Container
 
@@ -40,7 +43,7 @@ type GUI[number matrix.Number] struct {
 	App    fyne.App
 }
 
-func (p *GUI[number]) createTable() {
+func (p *GUI) createTable() {
 	table := widget.NewTableWithHeaders(
 		func() (int, int) {
 			if p.Matrix == nil {
@@ -87,29 +90,29 @@ func (p *GUI[number]) createTable() {
 	p.TableContainer = container.NewPadded(p.Table)
 }
 
-func NewGUI[number matrix.Number]() *GUI[number] {
-	ui := &GUI[number]{}
-	ui.Matrix = nil
+func NewGUI() *GUI {
+	gui := &GUI{}
+	gui.Matrix = nil
 
-	ui.App = app.New()
-	ui.Window = ui.App.NewWindow("mlat")
+	gui.App = app.New()
+	gui.Window = gui.App.NewWindow("mlat")
 
-	ui.createTable()
-	ui.createOptions()
-	ui.createActions()
-	ui.MainContainer = container.NewBorder(
-		nil, ui.ActionsContainer, ui.OptionsContainer, nil, ui.TableContainer,
+	gui.createTable()
+	gui.createOptions()
+	gui.createActions()
+	gui.MainContainer = container.NewBorder(
+		nil, gui.ActionsContainer, gui.OptionsContainer, nil, gui.TableContainer,
 	)
-	ui.Window.SetContent(ui.MainContainer)
+	gui.Window.SetContent(gui.MainContainer)
 
-	return ui
+	return gui
 }
 
-func (p *GUI[_]) Run() {
+func (p *GUI) Run() {
 	p.Window.ShowAndRun()
 }
 
-func (p *GUI[_]) createOptions() {
+func (p *GUI) createOptions() {
 	p.OptionsContainer = container.NewVBox()
 
 	p.OptionsLabel = canvas.NewText("Options", theme.ForegroundColor())
@@ -149,19 +152,49 @@ func (p *GUI[_]) createOptions() {
 	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
 }
 
-func (p *GUI[_]) createActions() {
+func (p *GUI) createActions() {
 	p.ActionsContainer = container.NewGridWithRows(1)
 
+	p.ActionsImportDialog = dialog.NewFileOpen(
+		func(uri fyne.URIReadCloser, err error) {
+			if uri == nil || err != nil {
+				return
+			}
+
+			mx, err := matrix.ReadSlow(uri.URI().Path())
+			if err != nil {
+				return
+			}
+
+			p.Matrix, _ = matrix.NewMatrix(mx, false)
+			p.Table.Refresh()
+		},
+		p.Window,
+	)
 	p.ActionsImport = widget.NewButtonWithIcon(
 		"Import Matrix",
 		theme.UploadIcon(),
-		func() {},
+		func() {
+			p.ActionsImportDialog.Show()
+		},
 	)
 
+	p.ActionsExportDialog = dialog.NewFileSave(
+		func(uri fyne.URIWriteCloser, err error) {
+			if uri == nil || err != nil {
+				return
+			}
+
+			matrix.Write(uri.URI().Path(), p.Matrix.Data)
+		},
+		p.Window,
+	)
 	p.ActionsExport = widget.NewButtonWithIcon(
 		"Export Matrix",
 		theme.DownloadIcon(),
-		func() {},
+		func() {
+			p.ActionsExportDialog.Show()
+		},
 	)
 
 	p.ActionsCalculate = widget.NewButtonWithIcon(
