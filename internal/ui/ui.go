@@ -2,43 +2,45 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"strconv"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	
 	"github.com/shimeoki/mlat/internal/matrix"
 )
 
-type UI[number matrix.Number] struct {
+type GUI[number matrix.Number] struct {
 	TableContainer *fyne.Container
-	Table *widget.Table
-	Matrix *matrix.Matrix[number]
+	Table          *widget.Table
+	Matrix         *matrix.Matrix[number]
 
 	OptionsContainer *fyne.Container
-	OptionsLabel *canvas.Text
+	OptionsLabel     *canvas.Text
 	OptionsAugmented *widget.Check
-	OptionsRows *widget.Entry
-	OptionsCols *widget.Entry
-	OptionsSolution *widget.Select
-	
+	OptionsRows      *widget.Entry
+	OptionsCols      *widget.Entry
+	OptionsSolution  *widget.Select
+
 	ActionsContainer *fyne.Container
-	ActionsImport *widget.Button
-	ActionsExport *widget.Button
+	ActionsImport    *widget.Button
+	ActionsExport    *widget.Button
 	ActionsCalculate *widget.Button
-	ActionsCopy *widget.Button
-	ActionsAnswer *widget.Entry
-	ActionsStatus *widget.ProgressBarInfinite
+	ActionsCopy      *widget.Button
+	ActionsAnswer    *widget.Entry
+	ActionsStatus    *widget.ProgressBarInfinite
 
 	MainContainer *fyne.Container
 
 	Window fyne.Window
-	App fyne.App
+	App    fyne.App
 }
 
-func (p *UI[number]) createTable() {
+func (p *GUI[number]) createTable() {
 	table := widget.NewTableWithHeaders(
 		func() (int, int) {
 			if p.Matrix == nil {
@@ -85,13 +87,13 @@ func (p *UI[number]) createTable() {
 	p.TableContainer = container.NewPadded(p.Table)
 }
 
-func MakeUI[number matrix.Number]() *UI[number] {
-	ui := &UI[number]{}
+func NewGUI[number matrix.Number]() *GUI[number] {
+	ui := &GUI[number]{}
 	ui.Matrix = nil
-	
+
 	ui.App = app.New()
 	ui.Window = ui.App.NewWindow("mlat")
-	
+
 	ui.createTable()
 	ui.createOptions()
 	ui.createActions()
@@ -103,11 +105,11 @@ func MakeUI[number matrix.Number]() *UI[number] {
 	return ui
 }
 
-func (p *UI[_]) RunUI() {
+func (p *GUI[_]) Run() {
 	p.Window.ShowAndRun()
 }
 
-func (p *UI[_]) createOptions() {
+func (p *GUI[_]) createOptions() {
 	p.OptionsContainer = container.NewVBox()
 
 	p.OptionsLabel = canvas.NewText("Options", theme.ForegroundColor())
@@ -147,7 +149,7 @@ func (p *UI[_]) createOptions() {
 	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
 }
 
-func (p *UI[_]) createActions() {
+func (p *GUI[_]) createActions() {
 	p.ActionsContainer = container.NewGridWithRows(1)
 
 	p.ActionsImport = widget.NewButtonWithIcon(
