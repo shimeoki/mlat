@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -210,7 +211,17 @@ func (p *GUI) createActions() {
 	p.ActionsCopy = widget.NewButtonWithIcon(
 		"",
 		theme.ContentCopyIcon(),
-		func() {},
+		func() {
+			p.Window.Clipboard().SetContent(
+				p.ActionsAnswer.Text,
+			)
+			p.ActionsCopy.Icon = theme.ConfirmIcon()
+			p.ActionsCopy.Refresh()
+			
+			time.Sleep(1 * time.Second)
+			p.ActionsCopy.Icon = theme.ContentCopyIcon()
+			p.ActionsCopy.Refresh()
+		},
 	)
 
 	p.ActionsStatus = widget.NewProgressBarInfinite()
