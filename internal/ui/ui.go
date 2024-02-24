@@ -79,7 +79,11 @@ func (p *GUI) createTable() {
 		if id.Row == -1 && id.Col == -1 {
 			text = ""
 		} else if id.Row == -1 {
-			text = fmt.Sprint(id.Col + 1)
+			if id.Col+1 == p.Matrix.Shape[1] && p.Matrix.Augmented {
+				text = ""
+			} else {
+				text = fmt.Sprint(id.Col + 1)
+			}
 		} else {
 			text = fmt.Sprint(id.Row + 1)
 		}
@@ -121,8 +125,18 @@ func (p *GUI) createOptions() {
 	p.OptionsLabel.TextSize = 24
 	p.OptionsContainer.Add(p.OptionsLabel)
 
-	p.OptionsAugmented = widget.NewCheck("Augmented", func(bool) {})
-	p.OptionsAugmented.Disable()
+	p.OptionsAugmented = widget.NewCheck(
+		"Augmented", 
+		func(state bool) {
+			if p.Matrix == nil {
+				return
+			}
+
+			p.Matrix, _ = matrix.NewMatrix(p.Matrix.Data, state)
+			p.Table.Refresh()
+		},
+	)
+	// p.OptionsAugmented.Disable()
 	p.OptionsContainer.Add(p.OptionsAugmented)
 
 	validator := func(s string) error {
@@ -168,6 +182,8 @@ func (p *GUI) createActions() {
 			}
 
 			p.Matrix, _ = matrix.NewMatrix(mx, false)
+			p.OptionsRows.SetText(fmt.Sprint(p.Matrix.Shape[0]))
+			p.OptionsCols.SetText(fmt.Sprint(p.Matrix.Shape[1]))
 			p.Table.Refresh()
 		},
 		p.Window,
@@ -201,7 +217,28 @@ func (p *GUI) createActions() {
 	p.ActionsCalculate = widget.NewButtonWithIcon(
 		"Calculate",
 		theme.GridIcon(),
-		func() {},
+		func() {
+			p.ActionsStatus.Start()
+			defer p.ActionsStatus.Stop()
+			answer, err := p.Matrix.Calculate()
+			if err != nil {
+				p.ActionsStatus.Stop()
+				dialog.ShowInformation(
+					"Error!",
+					"Matrix is not a square.",
+					p.Window,
+				)
+				return
+			}
+
+			if len(answer) == 1 {
+				p.ActionsAnswer.SetText(fmt.Sprintf("%f", answer[0]))
+			} else {
+				p.ActionsAnswer.SetText(
+					matrix.ArrayToString(p.Matrix.GetRoots(), " "),
+				)
+			}
+		},
 	)
 
 	p.ActionsAnswer = widget.NewEntry()
@@ -217,7 +254,7 @@ func (p *GUI) createActions() {
 			)
 			p.ActionsCopy.Icon = theme.ConfirmIcon()
 			p.ActionsCopy.Refresh()
-			
+
 			time.Sleep(1 * time.Second)
 			p.ActionsCopy.Icon = theme.ContentCopyIcon()
 			p.ActionsCopy.Refresh()

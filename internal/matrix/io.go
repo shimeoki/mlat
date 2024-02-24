@@ -48,9 +48,7 @@ func Write[number Number](path string, matrix [][]number) error {
 	var sb strings.Builder
 
 	for _, row := range matrix {
-		sb.WriteString(
-			strings.Trim(strings.Replace(fmt.Sprint(row), " ", " ", -1), "[]"),
-		)
+		sb.WriteString(ArrayToString(row, " "))
 		sb.WriteByte('\n')
 	}
 
@@ -105,4 +103,10 @@ func getRowsCols(path string) (int, int, error) {
 	}
 
 	return rows, cols, nil
+}
+
+func ArrayToString[number Number](array []number, separator string) string {
+	return strings.Trim(
+		strings.Replace(fmt.Sprint(array), " ", separator, -1), "[]",
+	)
 }
