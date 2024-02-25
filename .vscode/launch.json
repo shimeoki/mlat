@@ -5,18 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "main.go",
+            "name": "Main",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "cmd/app/main.go"
-        },
-        {
-            "name": "fyne test",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "internal/ui/ui.go"
         }
     ]
 }
