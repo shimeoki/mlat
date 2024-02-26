@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"slices"
 	"strings"
 )
@@ -13,72 +12,62 @@ type Number interface {
 	int | float64
 }
 
-type CustomMatrix[number Number] struct {
-	Data         [][]number
-	Type         reflect.Type
+type CustomMatrix struct {
+	Data         [][]float64
 	Shape        [2]int
 	Augmented    bool
 	Square       bool
-	Determinants []number
+	Determinants []float64
 	Roots        []float64
 }
 
-func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*CustomMatrix[number], error) {
+func NewBlankMatrix(rows, cols int, augmented bool) (*CustomMatrix, error) {
 	if rows <= 0 || cols <= 0 {
 		return nil, errors.New("shape is invalid")
 	}
 
 	// create matrix with contiguous memory allocation
-	matrix, memory, _ := Malloc[number](rows, cols)
+	matrix, memory, _ := Malloc[float64](rows, cols)
 	for i := 0; i < rows; i++ {
 		matrix[i] = memory[(i * cols):((i + 1) * cols)]
 	}
 
 	// return pointer to new matrix
 	shape := [2]int{rows, cols}
-	var t [0]number
-	return &CustomMatrix[number]{
+	return &CustomMatrix{
 		matrix,
-		reflect.TypeOf(t).Elem(),
 		shape,
 		augmented,
 		isSquare(augmented, shape),
-		makeDets[number](augmented, shape[1]),
+		makeDets(augmented, shape[1]),
 		makeRoots(augmented, shape[1]),
 	}, nil
 }
 
-func NewMatrix[number Number](matrix [][]number, augmented bool) (*CustomMatrix[number], error) {
+func NewMatrix(matrix [][]float64, augmented bool) (*CustomMatrix, error) {
 	if matrix == nil {
 		return nil, nil
 	}
 
 	shape := [2]int{len(matrix), len(matrix[0])}
-	var t [0]number
-	return &CustomMatrix[number]{
+	return &CustomMatrix {
 		matrix,
-		reflect.TypeOf(t).Elem(),
 		shape,
 		augmented,
 		isSquare(augmented, shape),
-		makeDets[number](augmented, shape[1]),
+		makeDets(augmented, shape[1]),
 		makeRoots(augmented, shape[1]),
 	}, nil
 }
 
-func (p *CustomMatrix[number]) FillRandom(upper int) error {
+func (p *CustomMatrix) FillRandom(upper int) error {
 	if upper <= 0 {
 		return errors.New("upper limit is invalid")
 	}
 
 	for i := 0; i < p.Shape[0]; i++ {
 		for j := 0; j < p.Shape[1]; j++ {
-			switch p.Type {
-			case reflect.TypeOf(0):
-				p.Data[i][j] = number(rand.Intn(upper))
-			case reflect.TypeOf(0.0):
-				p.Data[i][j] = number(rand.Float64() * float64(upper))
-			}
+			p.Data[i][j] = rand.Float64() * float64(upper)
 		}
 	}
 
@@ -93,11 +82,11 @@ func isSquare(augmented bool, shape [2]int) bool {
 	}
 }
 
-func makeDets[number Number](augmented bool, cols int) []number {
+func makeDets(augmented bool, cols int) []float64 {
 	if augmented {
-		return make([]number, cols)
+		return make([]float64, cols)
 	} else {
-		return make([]number, 1)
+		return make([]float64, 1)
 	}
 }
 
@@ -131,7 +120,7 @@ func Malloc[number Number](rows, cols int) ([][]number, []number, error) {
 //
 // if matrix is not augmented, returns [1]number.
 // otherwise returns [cols]number
-func (p *CustomMatrix[number]) Calculate() ([]number, error) {
+func (p *CustomMatrix) Calculate() ([]float64, error) {
 	if !p.Square {
 		return nil, errors.New("matrix is not a square")
 	}
@@ -151,7 +140,7 @@ func (p *CustomMatrix[number]) Calculate() ([]number, error) {
 	return p.Determinants, nil
 }
 
-func (p *CustomMatrix[_]) GetRoots() []float64 {
+func (p *CustomMatrix) GetRoots() []float64 {
 	if p.Determinants[0] == 0 || p.Determinants == nil || !p.Augmented {
 		return nil
 	}
@@ -238,7 +227,7 @@ func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix 
 	return
 }
 
-func (p *CustomMatrix[number]) String() string {
+func (p *CustomMatrix) String() string {
 	rows := make([]string, p.Shape[0])
 
 	for i, row := range p.Data {

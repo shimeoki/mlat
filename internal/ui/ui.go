@@ -19,7 +19,7 @@ import (
 type GUI struct {
 	TableContainer *fyne.Container
 	Table          *widget.Table
-	Matrix         *matrix.CustomMatrix[float64]
+	Matrix         *matrix.CustomMatrix
 
 	OptionsContainer *fyne.Container
 	OptionsLabel     *canvas.Text
