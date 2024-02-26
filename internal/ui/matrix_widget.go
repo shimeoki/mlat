@@ -3,22 +3,22 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
-	"github.com/shimeoki/mlat/internal/matrix"
+	matrix "github.com/shimeoki/mlat/internal/cmatrix"
 )
 
 type MatrixWidget[number matrix.Number] struct {
 	BaseWidget widget.BaseWidget
-	Matrix     *matrix.Matrix[number]
-	visible bool
-	size fyne.Size
-	cellSize float32
-	position fyne.Position
+	Matrix     *matrix.CustomMatrix[number]
+	visible    bool
+	size       fyne.Size
+	cellSize   float32
+	position   fyne.Position
 }
 
-func NewMatrixWidget[number matrix.Number](matrix *matrix.Matrix[number]) *MatrixWidget[number] {
+func NewMatrixWidget[number matrix.Number](matrix *matrix.CustomMatrix[number]) *MatrixWidget[number] {
 	matrixWidget := &MatrixWidget[number]{}
 	matrixWidget.Matrix = matrix
-	
+
 	matrixWidget.BaseWidget.ExtendBaseWidget(matrixWidget)
 	return matrixWidget
 }
@@ -59,7 +59,6 @@ func (p *MatrixWidget[number]) Resize(size fyne.Size) {
 func (p *MatrixWidget[number]) Size() fyne.Size {
 	return fyne.NewSize(100, 100)
 }
-
 
 func (p *MatrixWidget[number]) CreateRenderer() fyne.WidgetRenderer {
 	return &matrixRenderer[number]{matrixWidget: p}

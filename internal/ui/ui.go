@@ -13,13 +13,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/shimeoki/mlat/internal/matrix"
+	matrix "github.com/shimeoki/mlat/internal/cmatrix"
 )
 
 type GUI struct {
 	TableContainer *fyne.Container
 	Table          *widget.Table
-	Matrix         *matrix.Matrix[float64]
+	Matrix         *matrix.CustomMatrix[float64]
 
 	OptionsContainer *fyne.Container
 	OptionsLabel     *canvas.Text
@@ -126,7 +126,7 @@ func (p *GUI) createOptions() {
 	p.OptionsContainer.Add(p.OptionsLabel)
 
 	p.OptionsAugmented = widget.NewCheck(
-		"Augmented", 
+		"Augmented",
 		func(state bool) {
 			if p.Matrix == nil {
 				return

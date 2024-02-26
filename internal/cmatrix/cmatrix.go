@@ -1,4 +1,4 @@
-package matrix
+package cmatrix
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ type Number interface {
 	int | float64
 }
 
-type Matrix[number Number] struct {
+type CustomMatrix[number Number] struct {
 	Data         [][]number
 	Type         reflect.Type
 	Shape        [2]int
@@ -23,7 +23,7 @@ type Matrix[number Number] struct {
 	Roots        []float64
 }
 
-func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*Matrix[number], error) {
+func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*CustomMatrix[number], error) {
 	if rows <= 0 || cols <= 0 {
 		return nil, errors.New("shape is invalid")
 	}
@@ -37,7 +37,7 @@ func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*Matrix[numb
 	// return pointer to new matrix
 	shape := [2]int{rows, cols}
 	var t [0]number
-	return &Matrix[number]{
+	return &CustomMatrix[number]{
 		matrix,
 		reflect.TypeOf(t).Elem(),
 		shape,
@@ -48,14 +48,14 @@ func NewBlankMatrix[number Number](rows, cols int, augmented bool) (*Matrix[numb
 	}, nil
 }
 
-func NewMatrix[number Number](matrix [][]number, augmented bool) (*Matrix[number], error) {
+func NewMatrix[number Number](matrix [][]number, augmented bool) (*CustomMatrix[number], error) {
 	if matrix == nil {
 		return nil, nil
 	}
 
 	shape := [2]int{len(matrix), len(matrix[0])}
 	var t [0]number
-	return &Matrix[number]{
+	return &CustomMatrix[number]{
 		matrix,
 		reflect.TypeOf(t).Elem(),
 		shape,
@@ -66,7 +66,7 @@ func NewMatrix[number Number](matrix [][]number, augmented bool) (*Matrix[number
 	}, nil
 }
 
-func (p *Matrix[number]) FillRandom(upper int) error {
+func (p *CustomMatrix[number]) FillRandom(upper int) error {
 	if upper <= 0 {
 		return errors.New("upper limit is invalid")
 	}
@@ -131,7 +131,7 @@ func Malloc[number Number](rows, cols int) ([][]number, []number, error) {
 //
 // if matrix is not augmented, returns [1]number.
 // otherwise returns [cols]number
-func (p *Matrix[number]) Calculate() ([]number, error) {
+func (p *CustomMatrix[number]) Calculate() ([]number, error) {
 	if !p.Square {
 		return nil, errors.New("matrix is not a square")
 	}
@@ -151,7 +151,7 @@ func (p *Matrix[number]) Calculate() ([]number, error) {
 	return p.Determinants, nil
 }
 
-func (p *Matrix[_]) GetRoots() []float64 {
+func (p *CustomMatrix[_]) GetRoots() []float64 {
 	if p.Determinants[0] == 0 || p.Determinants == nil || !p.Augmented {
 		return nil
 	}
@@ -238,7 +238,7 @@ func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix 
 	return
 }
 
-func (p *Matrix[number]) String() string {
+func (p *CustomMatrix[number]) String() string {
 	rows := make([]string, p.Shape[0])
 
 	for i, row := range p.Data {
