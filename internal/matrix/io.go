@@ -1,4 +1,4 @@
-package cmatrix
+package matrix
 
 import (
 	"bufio"

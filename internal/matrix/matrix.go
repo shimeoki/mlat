@@ -1,4 +1,4 @@
-package cmatrix
+package matrix
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ type Number interface {
 	int | float64
 }
 
-type CustomMatrix struct {
+type Matrix struct {
 	Data         [][]float64
 	Shape        [2]int
 	Augmented    bool
@@ -21,7 +21,7 @@ type CustomMatrix struct {
 	Roots        []float64
 }
 
-func NewBlankMatrix(rows, cols int, augmented bool) (*CustomMatrix, error) {
+func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
 	if rows <= 0 || cols <= 0 {
 		return nil, errors.New("shape is invalid")
 	}
@@ -34,7 +34,7 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*CustomMatrix, error) {
 
 	// return pointer to new matrix
 	shape := [2]int{rows, cols}
-	return &CustomMatrix{
+	return &Matrix{
 		matrix,
 		shape,
 		augmented,
@@ -44,13 +44,13 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*CustomMatrix, error) {
 	}, nil
 }
 
-func NewMatrix(matrix [][]float64, augmented bool) (*CustomMatrix, error) {
+func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
 	if matrix == nil {
 		return nil, nil
 	}
 
 	shape := [2]int{len(matrix), len(matrix[0])}
-	return &CustomMatrix {
+	return &Matrix{
 		matrix,
 		shape,
 		augmented,
@@ -60,7 +60,7 @@ func NewMatrix(matrix [][]float64, augmented bool) (*CustomMatrix, error) {
 	}, nil
 }
 
-func (p *CustomMatrix) FillRandom(upper int) error {
+func (p *Matrix) FillRandom(upper int) error {
 	if upper <= 0 {
 		return errors.New("upper limit is invalid")
 	}
@@ -120,7 +120,7 @@ func Malloc[number Number](rows, cols int) ([][]number, []number, error) {
 //
 // if matrix is not augmented, returns [1]number.
 // otherwise returns [cols]number
-func (p *CustomMatrix) Calculate() ([]float64, error) {
+func (p *Matrix) Calculate() ([]float64, error) {
 	if !p.Square {
 		return nil, errors.New("matrix is not a square")
 	}
@@ -140,7 +140,7 @@ func (p *CustomMatrix) Calculate() ([]float64, error) {
 	return p.Determinants, nil
 }
 
-func (p *CustomMatrix) GetRoots() []float64 {
+func (p *Matrix) GetRoots() []float64 {
 	if p.Determinants[0] == 0 || p.Determinants == nil || !p.Augmented {
 		return nil
 	}
@@ -227,7 +227,7 @@ func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix 
 	return
 }
 
-func (p *CustomMatrix) String() string {
+func (p *Matrix) String() string {
 	rows := make([]string, p.Shape[0])
 
 	for i, row := range p.Data {

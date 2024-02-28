@@ -13,13 +13,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	matrix "github.com/shimeoki/mlat/internal/cmatrix"
+	cmatrix "github.com/shimeoki/mlat/internal/matrix"
 )
 
 type GUI struct {
 	TableContainer *fyne.Container
 	Table          *widget.Table
-	Matrix         *matrix.CustomMatrix
+	Matrix         *cmatrix.Matrix
 
 	OptionsContainer *fyne.Container
 	OptionsLabel     *canvas.Text
@@ -132,7 +132,7 @@ func (p *GUI) createOptions() {
 				return
 			}
 
-			p.Matrix, _ = matrix.NewMatrix(p.Matrix.Data, state)
+			p.Matrix, _ = cmatrix.NewMatrix(p.Matrix.Data, state)
 			p.Table.Refresh()
 		},
 	)
@@ -176,12 +176,12 @@ func (p *GUI) createActions() {
 				return
 			}
 
-			mx, err := matrix.ReadSlow(uri.URI().Path())
+			mx, err := cmatrix.ReadSlow(uri.URI().Path())
 			if err != nil {
 				return
 			}
 
-			p.Matrix, _ = matrix.NewMatrix(mx, false)
+			p.Matrix, _ = cmatrix.NewMatrix(mx, false)
 			p.OptionsRows.SetText(fmt.Sprint(p.Matrix.Shape[0]))
 			p.OptionsCols.SetText(fmt.Sprint(p.Matrix.Shape[1]))
 			p.Table.Refresh()
@@ -202,7 +202,7 @@ func (p *GUI) createActions() {
 				return
 			}
 
-			matrix.Write(uri.URI().Path(), p.Matrix.Data)
+			cmatrix.Write(uri.URI().Path(), p.Matrix.Data)
 		},
 		p.Window,
 	)
@@ -235,7 +235,7 @@ func (p *GUI) createActions() {
 				p.ActionsAnswer.SetText(fmt.Sprintf("%f", answer[0]))
 			} else {
 				p.ActionsAnswer.SetText(
-					matrix.ArrayToString(p.Matrix.GetRoots(), " "),
+					cmatrix.ArrayToString(p.Matrix.GetRoots(), " "),
 				)
 			}
 		},

@@ -3,19 +3,19 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
-	matrix "github.com/shimeoki/mlat/internal/cmatrix"
+	cmatrix "github.com/shimeoki/mlat/internal/matrix"
 )
 
 type MatrixWidget struct {
 	BaseWidget widget.BaseWidget
-	Matrix     *matrix.CustomMatrix
+	Matrix     *cmatrix.Matrix
 	visible    bool
 	size       fyne.Size
 	cellSize   float32
 	position   fyne.Position
 }
 
-func NewMatrixWidget(matrix *matrix.CustomMatrix) *MatrixWidget {
+func NewMatrixWidget(matrix *cmatrix.Matrix) *MatrixWidget {
 	matrixWidget := &MatrixWidget{}
 	matrixWidget.Matrix = matrix
 
