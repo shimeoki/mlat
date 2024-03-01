@@ -36,7 +36,7 @@ func (p *MatrixWidget) Visible() bool {
 }
 
 func (p *MatrixWidget) MinSize() fyne.Size {
-	rows, cols := p.Matrix.Shape[0], p.Matrix.Shape[1]
+	rows, cols := p.Matrix.Rows, p.Matrix.Cols
 	return fyne.NewSize(p.cellSize*float32(cols), p.cellSize*float32(rows))
 }
 

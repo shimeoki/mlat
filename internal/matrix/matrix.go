@@ -14,7 +14,8 @@ type Number interface {
 
 type Matrix struct {
 	Data         [][]float64
-	Shape        [2]int
+	Rows         int
+	Cols         int
 	Augmented    bool
 	Square       bool
 	Determinants []float64
@@ -33,14 +34,14 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
 	}
 
 	// return pointer to new matrix
-	shape := [2]int{rows, cols}
 	return &Matrix{
 		matrix,
-		shape,
+		rows,
+		cols,
 		augmented,
-		isSquare(augmented, shape),
-		makeDets(augmented, shape[1]),
-		makeRoots(augmented, shape[1]),
+		isSquare(augmented, rows, cols),
+		makeDets(augmented, cols),
+		makeRoots(augmented, cols),
 	}, nil
 }
 
@@ -49,14 +50,15 @@ func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
 		return nil, nil
 	}
 
-	shape := [2]int{len(matrix), len(matrix[0])}
+	rows, cols := len(matrix), len(matrix[0])
 	return &Matrix{
 		matrix,
-		shape,
+		rows,
+		cols,
 		augmented,
-		isSquare(augmented, shape),
-		makeDets(augmented, shape[1]),
-		makeRoots(augmented, shape[1]),
+		isSquare(augmented, rows, cols),
+		makeDets(augmented, cols),
+		makeRoots(augmented, cols),
 	}, nil
 }
 
@@ -65,8 +67,8 @@ func (p *Matrix) FillRandom(upper int) error {
 		return errors.New("upper limit is invalid")
 	}
 
-	for i := 0; i < p.Shape[0]; i++ {
-		for j := 0; j < p.Shape[1]; j++ {
+	for i := 0; i < p.Rows; i++ {
+		for j := 0; j < p.Cols; j++ {
 			p.Data[i][j] = rand.Float64() * float64(upper)
 		}
 	}
@@ -74,11 +76,11 @@ func (p *Matrix) FillRandom(upper int) error {
 	return nil
 }
 
-func isSquare(augmented bool, shape [2]int) bool {
+func isSquare(augmented bool, rows, cols int) bool {
 	if augmented {
-		return shape[0] == (shape[1] - 1)
+		return rows == (cols - 1)
 	} else {
-		return shape[0] == shape[1]
+		return rows == cols
 	}
 }
 
@@ -131,7 +133,7 @@ func (p *Matrix) Calculate() ([]float64, error) {
 		p.Determinants = calcDets(p.Data)
 
 		if p.Determinants[0] != 0 {
-			for i := range p.Shape[1] - 1 {
+			for i := range p.Cols - 1 {
 				p.Roots[i] = float64(p.Determinants[i+1]) / float64(p.Determinants[0])
 			}
 		}
@@ -145,7 +147,7 @@ func (p *Matrix) GetRoots() []float64 {
 		return nil
 	}
 
-	for i := range p.Shape[1] - 1 {
+	for i := range p.Cols - 1 {
 		p.Roots[i] = float64(p.Determinants[i+1]) / float64(p.Determinants[0])
 	}
 
@@ -228,7 +230,7 @@ func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix 
 }
 
 func (p *Matrix) String() string {
-	rows := make([]string, p.Shape[0])
+	rows := make([]string, p.Rows)
 
 	for i, row := range p.Data {
 		rows[i] = fmt.Sprint(row)

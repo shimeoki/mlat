@@ -50,7 +50,7 @@ func (p *GUI) createTable() {
 			if p.Matrix == nil {
 				return 0, 0
 			}
-			return p.Matrix.Shape[0], p.Matrix.Shape[1]
+			return p.Matrix.Rows, p.Matrix.Cols
 		},
 		func() fyne.CanvasObject {
 			object := widget.NewEntry()
@@ -79,7 +79,7 @@ func (p *GUI) createTable() {
 		if id.Row == -1 && id.Col == -1 {
 			text = ""
 		} else if id.Row == -1 {
-			if id.Col+1 == p.Matrix.Shape[1] && p.Matrix.Augmented {
+			if id.Col+1 == p.Matrix.Cols && p.Matrix.Augmented {
 				text = ""
 			} else {
 				text = fmt.Sprint(id.Col + 1)
@@ -182,8 +182,8 @@ func (p *GUI) createActions() {
 			}
 
 			p.Matrix, _ = cmatrix.NewMatrix(mx, false)
-			p.OptionsRows.SetText(fmt.Sprint(p.Matrix.Shape[0]))
-			p.OptionsCols.SetText(fmt.Sprint(p.Matrix.Shape[1]))
+			p.OptionsRows.SetText(fmt.Sprint(p.Matrix.Rows))
+			p.OptionsCols.SetText(fmt.Sprint(p.Matrix.Cols))
 			p.Table.Refresh()
 		},
 		p.Window,
