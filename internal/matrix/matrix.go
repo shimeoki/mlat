@@ -262,3 +262,21 @@ func replaceColInAugmented[number Number](matrix [][]number, index int) (newMatr
 
 	return
 }
+
+func (p *Matrix) GetAdjugate() (newMatrix [][]float64) {
+	if !p.Square {
+		return nil
+	}
+
+	adjugate, memory, _ := Malloc[float64](p.Rows, p.Cols)
+	for i := range p.Rows {
+		adjugate[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
+		for j := range p.Cols {
+			cellValue := p.Data[i][j]
+			matrix := deleteRowAndCol(p.Data, i, j)
+			adjugate[i][j] = cellValue*calcDet(matrix)
+		}
+	}
+
+	return adjugate
+}
