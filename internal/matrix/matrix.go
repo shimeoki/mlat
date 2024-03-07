@@ -262,3 +262,24 @@ func replaceColInAugmented[number Number](matrix [][]number, index int) (newMatr
 
 	return
 }
+
+func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
+	if p.Cols != matrix.Rows {
+		return nil
+	}
+
+	rows, cols := p.Rows, matrix.Cols
+	newMatrix, memory, _ := Malloc[float64](rows, cols)
+	for i := range rows {
+		newMatrix[i] = memory[i*cols: (i+1)*cols]
+		for j := range cols {
+			cellValue := 0.0
+			for k := range p.Cols {
+				cellValue += p.Data[i][k]*matrix.Data[k][j]
+			}
+			newMatrix[i][j] = cellValue
+		}
+	}
+
+	return newMatrix;
+}
