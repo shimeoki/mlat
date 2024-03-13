@@ -51,20 +51,26 @@ type DeterminantTab struct {
 }
 
 type MultiplyTab struct {
-	MatrixA *cmatrix.Matrix
-	TableA *widget.Table
+	Common int
+	Rows int
+	Cols int
+
+	MatrixA         *cmatrix.Matrix
+	TableA          *widget.Table
 	TableAContainer *fyne.Container
 
-	MatrixB *cmatrix.Matrix
-	TableB *widget.Table
+	MatrixB         *cmatrix.Matrix
+	TableB          *widget.Table
 	TableBContainer *fyne.Container
 
-	MatrixResult *cmatrix.Matrix
-	TableResult *widget.Table
+	MatrixResult         *cmatrix.Matrix
+	TableResult          *widget.Table
 	TableResultContainer *fyne.Container
 
-	OptionsRows *fyne.Container
-	OptionsCols *fyne.Container
+	OptionsRows      *fyne.Container
+	OptionsCols      *fyne.Container
+	OptionsImportA   *fyne.Container
+	OptionsImportB *fyne.Container
 	OptionsContainer *fyne.Container
 
 	MainContainer *fyne.Container
@@ -147,7 +153,7 @@ func (p *GUI) Run() {
 func (p *GUI) newDeterminantTab() *DeterminantTab {
 	tab := &DeterminantTab{}
 	tab.GUI = p
-	
+
 	tab.Matrix = nil
 
 	tab.Table = createTable(&tab.Matrix)
@@ -167,7 +173,7 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab.GUI = p
 
 	tab.MatrixA, tab.MatrixB, tab.MatrixResult = nil, nil, nil
-	
+
 	tab.TableA = createTable(&tab.MatrixA)
 	tab.TableB = createTable(&tab.MatrixB)
 	tab.TableResult = createTable(&tab.MatrixResult)
@@ -181,13 +187,13 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab.OptionsContainer = container.NewPadded(tab.OptionsRows, tab.OptionsCols)
 
 	tab.MainContainer = container.NewAdaptiveGrid(
-		2, 
-		tab.TableAContainer, 
-		tab.TableBContainer, 
-		tab.TableResultContainer, 
+		2,
+		tab.TableAContainer,
+		tab.TableBContainer,
+		tab.TableResultContainer,
 		tab.OptionsContainer,
 	)
-	
+
 	return tab
 }
 
@@ -239,6 +245,31 @@ func (p *DeterminantTab) createOptions() {
 	p.OptionsContainer.Add(p.OptionsSolution)
 
 	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
+}
+
+func (p *GUI) createImportButton(text string, matrix **cmatrix.Matrix) (button *widget.Button) {
+	button = widget.NewButtonWithIcon(
+		text,
+		theme.UploadIcon(),
+		func() {
+			dialog.NewFileOpen(
+				func(uri fyne.URIReadCloser, err error) {
+					if uri == nil || err != nil {
+						return
+					}
+		
+					mx, err := cmatrix.ReadSlow(uri.URI().Path())
+					if err != nil {
+						return
+					}
+		
+					*matrix, _ = cmatrix.NewMatrix(mx, false)
+				},
+				p.Window,
+			).Show()
+		},
+	)
+	return
 }
 
 func (p *DeterminantTab) createActions() {
