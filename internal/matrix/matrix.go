@@ -273,8 +273,11 @@ func (p *Matrix) GetAdjugate() (newMatrix [][]float64) {
 		adjugate[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
 		for j := range p.Cols {
 			cellValue := p.Data[i][j]
+			if (i+j)%2 != 0 {
+				cellValue = -cellValue
+			}
 			matrix := deleteRowAndCol(p.Data, i, j)
-			adjugate[i][j] = cellValue*calcDet(matrix)
+			adjugate[i][j] = cellValue * calcDet(matrix)
 		}
 	}
 
