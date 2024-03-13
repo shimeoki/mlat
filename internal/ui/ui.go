@@ -50,6 +50,28 @@ type DeterminantTab struct {
 	GUI *GUI
 }
 
+type MultiplyTab struct {
+	MatrixA *cmatrix.Matrix
+	TableA *widget.Table
+	TableAContainer *fyne.Container
+
+	MatrixB *cmatrix.Matrix
+	TableB *widget.Table
+	TableBContainer *fyne.Container
+
+	MatrixResult *cmatrix.Matrix
+	TableResult *widget.Table
+	TableResultContainer *fyne.Container
+
+	OptionsRows *fyne.Container
+	OptionsCols *fyne.Container
+	OptionsContainer *fyne.Container
+
+	MainContainer *fyne.Container
+
+	GUI *GUI
+}
+
 func createTable(matrix **cmatrix.Matrix) (table *widget.Table) {
 	table = widget.NewTableWithHeaders(
 		func() (int, int) {
@@ -65,7 +87,7 @@ func createTable(matrix **cmatrix.Matrix) (table *widget.Table) {
 		},
 		func(cellID widget.TableCellID, cell fyne.CanvasObject) {
 			var text string
-			if matrix == nil {
+			if *matrix == nil {
 				text = "nil"
 			} else {
 				text = fmt.Sprintf("%v", (*matrix).Data[cellID.Row][cellID.Col])
@@ -96,7 +118,6 @@ func createTable(matrix **cmatrix.Matrix) (table *widget.Table) {
 
 		cell.(*widget.Label).SetText(text)
 	}
-
 	return
 }
 
@@ -107,8 +128,10 @@ func NewGUI() *GUI {
 	gui.Window = gui.App.NewWindow("mlat")
 
 	determinantTab := gui.newDeterminantTab()
+	multiplyTab := gui.newMultiplyTab()
 	gui.Tabs = container.NewAppTabs(
 		container.NewTabItem("Determinant", determinantTab.MainContainer),
+		container.NewTabItem("Multiply", multiplyTab.MainContainer),
 	)
 
 	gui.Window.SetContent(gui.Tabs)
@@ -120,11 +143,12 @@ func (p *GUI) Run() {
 	p.Window.ShowAndRun()
 }
 
+// TODO change behaviour
 func (p *GUI) newDeterminantTab() *DeterminantTab {
 	tab := &DeterminantTab{}
-	tab.Matrix = nil
-
 	tab.GUI = p
+	
+	tab.Matrix = nil
 
 	tab.Table = createTable(&tab.Matrix)
 	tab.TableContainer = container.NewPadded(tab.Table)
@@ -134,6 +158,36 @@ func (p *GUI) newDeterminantTab() *DeterminantTab {
 		nil, tab.ActionsContainer, tab.OptionsContainer, nil, tab.TableContainer,
 	)
 
+	return tab
+}
+
+// TODO change behaviour
+func (p *GUI) newMultiplyTab() *MultiplyTab {
+	tab := &MultiplyTab{}
+	tab.GUI = p
+
+	tab.MatrixA, tab.MatrixB, tab.MatrixResult = nil, nil, nil
+	
+	tab.TableA = createTable(&tab.MatrixA)
+	tab.TableB = createTable(&tab.MatrixB)
+	tab.TableResult = createTable(&tab.MatrixResult)
+
+	tab.TableAContainer = container.NewPadded(tab.TableA)
+	tab.TableBContainer = container.NewPadded(tab.TableB)
+	tab.TableResultContainer = container.NewPadded(tab.TableResult)
+
+	tab.OptionsRows = container.NewPadded()
+	tab.OptionsCols = container.NewPadded()
+	tab.OptionsContainer = container.NewPadded(tab.OptionsRows, tab.OptionsCols)
+
+	tab.MainContainer = container.NewAdaptiveGrid(
+		2, 
+		tab.TableAContainer, 
+		tab.TableBContainer, 
+		tab.TableResultContainer, 
+		tab.OptionsContainer,
+	)
+	
 	return tab
 }
 
