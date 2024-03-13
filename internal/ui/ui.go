@@ -17,6 +17,13 @@ import (
 )
 
 type GUI struct {
+	Tabs *container.AppTabs
+
+	Window fyne.Window
+	App    fyne.App
+}
+
+type DeterminantTab struct {
 	TableContainer *fyne.Container
 	Table          *widget.Table
 	Matrix         *cmatrix.Matrix
@@ -40,11 +47,10 @@ type GUI struct {
 
 	MainContainer *fyne.Container
 
-	Window fyne.Window
-	App    fyne.App
+	GUI *GUI
 }
 
-func (p *GUI) createTable() {
+func (p *DeterminantTab) createTable() {
 	table := widget.NewTableWithHeaders(
 		func() (int, int) {
 			if p.Matrix == nil {
@@ -97,18 +103,16 @@ func (p *GUI) createTable() {
 
 func NewGUI() *GUI {
 	gui := &GUI{}
-	gui.Matrix = nil
 
 	gui.App = app.New()
 	gui.Window = gui.App.NewWindow("mlat")
 
-	gui.createTable()
-	gui.createOptions()
-	gui.createActions()
-	gui.MainContainer = container.NewBorder(
-		nil, gui.ActionsContainer, gui.OptionsContainer, nil, gui.TableContainer,
+	determinantTab := gui.newDeterminantTab()
+	gui.Tabs = container.NewAppTabs(
+		container.NewTabItem("Determinant", determinantTab.MainContainer),
 	)
-	gui.Window.SetContent(gui.MainContainer)
+
+	gui.Window.SetContent(gui.Tabs)
 
 	return gui
 }
@@ -117,7 +121,23 @@ func (p *GUI) Run() {
 	p.Window.ShowAndRun()
 }
 
-func (p *GUI) createOptions() {
+func (p *GUI) newDeterminantTab() *DeterminantTab {
+	tab := &DeterminantTab{}
+	tab.Matrix = nil
+	
+	tab.GUI = p
+
+	tab.createTable()
+	tab.createOptions()
+	tab.createActions()
+	tab.MainContainer = container.NewBorder(
+		nil, tab.ActionsContainer, tab.OptionsContainer, nil, tab.TableContainer,
+	)
+
+	return tab
+}
+
+func (p *DeterminantTab) createOptions() {
 	p.OptionsContainer = container.NewVBox()
 
 	p.OptionsLabel = canvas.NewText("Options", theme.ForegroundColor())
@@ -167,7 +187,7 @@ func (p *GUI) createOptions() {
 	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
 }
 
-func (p *GUI) createActions() {
+func (p *DeterminantTab) createActions() {
 	p.ActionsContainer = container.NewGridWithRows(1)
 
 	p.ActionsImportDialog = dialog.NewFileOpen(
@@ -186,7 +206,7 @@ func (p *GUI) createActions() {
 			p.OptionsCols.SetText(fmt.Sprint(p.Matrix.Cols))
 			p.Table.Refresh()
 		},
-		p.Window,
+		p.GUI.Window,
 	)
 	p.ActionsImport = widget.NewButtonWithIcon(
 		"Import Matrix",
@@ -204,7 +224,7 @@ func (p *GUI) createActions() {
 
 			cmatrix.Write(uri.URI().Path(), p.Matrix.Data)
 		},
-		p.Window,
+		p.GUI.Window,
 	)
 	p.ActionsExport = widget.NewButtonWithIcon(
 		"Export Matrix",
@@ -226,7 +246,7 @@ func (p *GUI) createActions() {
 				dialog.ShowInformation(
 					"Error!",
 					"Matrix is not a square.",
-					p.Window,
+					p.GUI.Window,
 				)
 				return
 			}
@@ -249,7 +269,7 @@ func (p *GUI) createActions() {
 		"",
 		theme.ContentCopyIcon(),
 		func() {
-			p.Window.Clipboard().SetContent(
+			p.GUI.Window.Clipboard().SetContent(
 				p.ActionsAnswer.Text,
 			)
 			p.ActionsCopy.Icon = theme.ConfirmIcon()
