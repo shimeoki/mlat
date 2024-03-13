@@ -50,55 +50,54 @@ type DeterminantTab struct {
 	GUI *GUI
 }
 
-func (p *DeterminantTab) createTable() {
-	table := widget.NewTableWithHeaders(
+func createTable(matrix **cmatrix.Matrix) (table *widget.Table) {
+	table = widget.NewTableWithHeaders(
 		func() (int, int) {
-			if p.Matrix == nil {
+			if *matrix == nil {
 				return 0, 0
 			}
-			return p.Matrix.Rows, p.Matrix.Cols
+			return (*matrix).Rows, (*matrix).Cols
 		},
 		func() fyne.CanvasObject {
-			object := widget.NewEntry()
-			object.Resize(fyne.NewSize(40, 20))
-			return object
+			cell := widget.NewEntry()
+			cell.Resize(fyne.NewSize(40, 20))
+			return cell
 		},
-		func(cell widget.TableCellID, object fyne.CanvasObject) {
+		func(cellID widget.TableCellID, cell fyne.CanvasObject) {
 			var text string
-			if p.Matrix == nil {
+			if matrix == nil {
 				text = "nil"
 			} else {
-				text = fmt.Sprintf("%v", p.Matrix.Data[cell.Row][cell.Col])
+				text = fmt.Sprintf("%v", (*matrix).Data[cellID.Row][cellID.Col])
 			}
-			object.(*widget.Entry).SetText(text)
+			cell.(*widget.Entry).SetText(text)
 		},
 	)
 	table.CreateHeader = func() fyne.CanvasObject {
-		object := widget.NewLabel("header")
-		object.TextStyle.Bold = true
-		object.Alignment = fyne.TextAlignCenter
-		return object
+		header := widget.NewLabel("header")
+		header.TextStyle.Bold = true
+		header.Alignment = fyne.TextAlignCenter
+		return header
 	}
-	table.UpdateHeader = func(id widget.TableCellID, object fyne.CanvasObject) {
+	table.UpdateHeader = func(cellID widget.TableCellID, cell fyne.CanvasObject) {
 		var text string
 
-		if id.Row == -1 && id.Col == -1 {
+		if cellID.Row == -1 && cellID.Col == -1 {
 			text = ""
-		} else if id.Row == -1 {
-			if id.Col+1 == p.Matrix.Cols && p.Matrix.Augmented {
+		} else if cellID.Row == -1 {
+			if cellID.Col+1 == (*matrix).Cols && (*matrix).Augmented {
 				text = ""
 			} else {
-				text = fmt.Sprint(id.Col + 1)
+				text = fmt.Sprint(cellID.Col + 1)
 			}
 		} else {
-			text = fmt.Sprint(id.Row + 1)
+			text = fmt.Sprint(cellID.Row + 1)
 		}
 
-		object.(*widget.Label).SetText(text)
+		cell.(*widget.Label).SetText(text)
 	}
 
-	p.Table = table
-	p.TableContainer = container.NewPadded(p.Table)
+	return
 }
 
 func NewGUI() *GUI {
@@ -124,10 +123,11 @@ func (p *GUI) Run() {
 func (p *GUI) newDeterminantTab() *DeterminantTab {
 	tab := &DeterminantTab{}
 	tab.Matrix = nil
-	
+
 	tab.GUI = p
 
-	tab.createTable()
+	tab.Table = createTable(&tab.Matrix)
+	tab.TableContainer = container.NewPadded(tab.Table)
 	tab.createOptions()
 	tab.createActions()
 	tab.MainContainer = container.NewBorder(
