@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -51,9 +53,9 @@ type DeterminantTab struct {
 }
 
 type MultiplyTab struct {
-	Common int
-	Rows int
-	Cols int
+	Common binding.Int
+	Rows   binding.Int
+	Cols   binding.Int
 
 	MatrixA         *cmatrix.Matrix
 	TableA          *widget.Table
@@ -67,11 +69,27 @@ type MultiplyTab struct {
 	TableResult          *widget.Table
 	TableResultContainer *fyne.Container
 
-	OptionsRows      *fyne.Container
-	OptionsCols      *fyne.Container
-	OptionsImportA   *fyne.Container
-	OptionsImportB *fyne.Container
-	OptionsContainer *fyne.Container
+	ActionsCommon          *widget.Entry
+	ActionsCommonContainer *fyne.Container
+
+	ActionsRows          *widget.Entry
+	ActionsRowsContainer *fyne.Container
+
+	ActionsCols          *widget.Entry
+	ActionsColsContainer *fyne.Container
+
+	ActionsOptions *fyne.Container
+
+	ActionsImportA          *widget.Button
+	ActionsImportAContainer *fyne.Container
+
+	ActionsImportB          *widget.Button
+	ActionsImportBContainer *fyne.Container
+
+	ActionsCalculate          *widget.Button
+	ActionsCalculateContainer *fyne.Container
+
+	ActionsContainer *fyne.Container
 
 	MainContainer *fyne.Container
 
@@ -172,6 +190,13 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab := &MultiplyTab{}
 	tab.GUI = p
 
+	tab.Common = binding.NewInt()
+	tab.Common.Set(1)
+	tab.Rows = binding.NewInt()
+	tab.Rows.Set(1)
+	tab.Cols = binding.NewInt()
+	tab.Cols.Set(1)
+
 	tab.MatrixA, tab.MatrixB, tab.MatrixResult = nil, nil, nil
 
 	tab.TableA = createTable(&tab.MatrixA)
@@ -182,16 +207,66 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab.TableBContainer = container.NewPadded(tab.TableB)
 	tab.TableResultContainer = container.NewPadded(tab.TableResult)
 
-	tab.OptionsRows = container.NewPadded()
-	tab.OptionsCols = container.NewPadded()
-	tab.OptionsContainer = container.NewPadded(tab.OptionsRows, tab.OptionsCols)
+	validator := func(s string) error {
+		value, err := strconv.Atoi(s)
+		if err != nil {
+			return err
+		}
+		if value <= 0 {
+			return errors.New("error: value is 0 or less")
+		}
+		return nil
+	}
+
+	tab.ActionsCommon = widget.NewEntryWithData(
+		binding.IntToString(tab.Common),
+	)
+	tab.ActionsCommon.OnChanged = func(s string) {
+		if value, err := strconv.Atoi(s); err == nil {
+			tab.Common.Set(value)
+		}
+	}
+	tab.ActionsCommon.Validator = validator
+	tab.ActionsCommonContainer = container.NewPadded(tab.ActionsCommon)
+
+	tab.ActionsRows = widget.NewEntryWithData(
+		binding.IntToString(tab.Rows),
+	)
+	tab.ActionsRows.OnChanged = func(s string) {
+		if value, err := strconv.Atoi(s); err == nil {
+			tab.Rows.Set(value)
+		}
+	}
+	tab.ActionsRows.Validator = validator
+	tab.ActionsRowsContainer = container.NewPadded(tab.ActionsRows)
+
+	tab.ActionsCols = widget.NewEntryWithData(
+		binding.IntToString(tab.Cols),
+	)
+	tab.ActionsCols.OnChanged = func(s string) {
+		if value, err := strconv.Atoi(s); err == nil {
+			tab.Cols.Set(value)
+		}
+	}
+	tab.ActionsCols.Validator = validator
+	tab.ActionsColsContainer = container.NewPadded(tab.ActionsCols)
+
+	tab.ActionsOptions = container.NewVBox(
+		tab.ActionsCommonContainer,
+		tab.ActionsRowsContainer,
+		tab.ActionsColsContainer,
+	)
+
+	tab.ActionsContainer = container.NewPadded(
+		tab.ActionsOptions,
+	)
 
 	tab.MainContainer = container.NewAdaptiveGrid(
 		2,
 		tab.TableAContainer,
 		tab.TableBContainer,
 		tab.TableResultContainer,
-		tab.OptionsContainer,
+		tab.ActionsContainer,
 	)
 
 	return tab
@@ -257,12 +332,12 @@ func (p *GUI) createImportButton(text string, matrix **cmatrix.Matrix) (button *
 					if uri == nil || err != nil {
 						return
 					}
-		
+
 					mx, err := cmatrix.ReadSlow(uri.URI().Path())
 					if err != nil {
 						return
 					}
-		
+
 					*matrix, _ = cmatrix.NewMatrix(mx, false)
 				},
 				p.Window,
