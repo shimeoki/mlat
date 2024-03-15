@@ -423,31 +423,6 @@ func (p *DeterminantTab) createOptions() {
 	p.OptionsContainer = container.NewPadded(p.OptionsContainer)
 }
 
-func (p *GUI) createImportButton(text string, matrix **cmatrix.Matrix) (button *widget.Button) {
-	button = widget.NewButtonWithIcon(
-		text,
-		theme.UploadIcon(),
-		func() {
-			dialog.NewFileOpen(
-				func(uri fyne.URIReadCloser, err error) {
-					if uri == nil || err != nil {
-						return
-					}
-
-					mx, err := cmatrix.ReadSlow(uri.URI().Path())
-					if err != nil {
-						return
-					}
-
-					*matrix, _ = cmatrix.NewMatrix(mx, false)
-				},
-				p.Window,
-			).Show()
-		},
-	)
-	return
-}
-
 func (p *DeterminantTab) createActions() {
 	p.ActionsContainer = container.NewGridWithRows(1)
 
