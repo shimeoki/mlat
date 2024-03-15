@@ -237,7 +237,10 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		tab.TableB.Refresh()
 	}
 	tab.ActionsCommon.Validator = validator
-	tab.ActionsCommonContainer = container.NewPadded(tab.ActionsCommon)
+	tab.ActionsCommonContainer = container.NewGridWithColumns(2,
+		container.NewBorder(nil, nil, nil, container.NewCenter(
+			widget.NewLabelWithStyle("Common: ", fyne.TextAlignTrailing, fyne.TextStyle{Monospace: true}))),
+		container.NewPadded(tab.ActionsCommon))
 
 	tab.ActionsRows = widget.NewEntryWithData(
 		binding.IntToString(tab.Rows),
@@ -254,7 +257,10 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		tab.TableResult.Refresh()
 	}
 	tab.ActionsRows.Validator = validator
-	tab.ActionsRowsContainer = container.NewPadded(tab.ActionsRows)
+	tab.ActionsRowsContainer = container.NewGridWithColumns(2,
+		container.NewBorder(nil, nil, nil, container.NewCenter(
+			widget.NewLabelWithStyle("Rows: ", fyne.TextAlignTrailing, fyne.TextStyle{Monospace: true}))),
+		container.NewPadded(tab.ActionsRows))
 
 	tab.ActionsCols = widget.NewEntryWithData(
 		binding.IntToString(tab.Cols),
@@ -271,7 +277,10 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		tab.TableResult.Refresh()
 	}
 	tab.ActionsCols.Validator = validator
-	tab.ActionsColsContainer = container.NewPadded(tab.ActionsCols)
+	tab.ActionsColsContainer = container.NewGridWithColumns(2,
+		container.NewBorder(nil, nil, nil, container.NewCenter(
+			widget.NewLabelWithStyle("Cols: ", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}))),
+		container.NewPadded(tab.ActionsCols))
 
 	tab.ActionsOptions = container.NewVBox(
 		tab.ActionsCommonContainer,
