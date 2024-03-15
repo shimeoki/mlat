@@ -288,11 +288,11 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 			widget.NewLabelWithStyle("Cols: ", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}))),
 		container.NewPadded(tab.ActionsCols))
 
-	tab.ActionsOptions = container.NewVBox(
+	tab.ActionsOptions = container.NewHBox(container.NewVBox(
 		tab.ActionsCommonContainer,
 		tab.ActionsRowsContainer,
 		tab.ActionsColsContainer,
-	)
+	))
 
 	tab.ActionsContainer = container.NewPadded(
 		tab.ActionsOptions,
