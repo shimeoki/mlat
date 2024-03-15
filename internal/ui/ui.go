@@ -347,6 +347,15 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		},
 	)
 	tab.ActionsImportBContainer = container.NewPadded(tab.ActionsImportB)
+	
+	tab.ActionsCalculate = widget.NewButtonWithIcon(
+		"Calculate",
+		theme.GridIcon(),
+		func() {
+			// functionality needed
+		},
+	)
+	tab.ActionsCalculateContainer = container.NewPadded(tab.ActionsCalculate)
 
 	tab.ActionsOptions = container.NewHBox(
 		container.NewVBox(
@@ -356,7 +365,9 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		), container.NewVBox(
 			tab.ActionsImportAContainer,
 			tab.ActionsImportBContainer,
+			tab.ActionsCalculateContainer,
 		))
+
 
 	tab.ActionsContainer = container.NewPadded(
 		tab.ActionsOptions,
