@@ -241,9 +241,15 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		binding.IntToString(tab.Rows),
 	)
 	tab.ActionsRows.OnChanged = func(s string) {
-		if value, err := strconv.Atoi(s); err == nil {
-			tab.Rows.Set(value)
+		if tab.ActionsRows.Validate() != nil {
+			return
 		}
+
+		rows, _ := strconv.Atoi(s)
+		tab.MatrixA.ResizeRows(rows)
+		tab.MatrixResult.ResizeRows(rows)
+		tab.TableA.Refresh()
+		tab.TableResult.Refresh()
 	}
 	tab.ActionsRows.Validator = validator
 	tab.ActionsRowsContainer = container.NewPadded(tab.ActionsRows)
