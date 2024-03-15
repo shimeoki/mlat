@@ -81,9 +81,11 @@ type MultiplyTab struct {
 	ActionsOptions *fyne.Container
 
 	ActionsImportA          *widget.Button
+	ActionsImportADialog    *dialog.FileDialog
 	ActionsImportAContainer *fyne.Container
 
 	ActionsImportB          *widget.Button
+	ActionsImportBDialog    *dialog.FileDialog
 	ActionsImportBContainer *fyne.Container
 
 	ActionsCalculate          *widget.Button
@@ -288,11 +290,73 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 			widget.NewLabelWithStyle("Cols: ", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}))),
 		container.NewPadded(tab.ActionsCols))
 
-	tab.ActionsOptions = container.NewHBox(container.NewVBox(
-		tab.ActionsCommonContainer,
-		tab.ActionsRowsContainer,
-		tab.ActionsColsContainer,
-	))
+	tab.ActionsImportADialog = dialog.NewFileOpen(
+		func(uri fyne.URIReadCloser, err error) {
+			if uri == nil || err != nil {
+				return
+			}
+
+			matrix, err := cmatrix.ReadSlow(uri.URI().Path())
+			if err != nil {
+				return
+			}
+
+			tab.MatrixA, _ = cmatrix.NewMatrix(matrix, false)
+			tab.Rows.Set(tab.MatrixA.Rows)
+			tab.Common.Set(tab.MatrixA.Cols)
+			tab.TableA.Refresh()
+			tab.TableB.Refresh()
+			tab.TableResult.Refresh()
+		},
+		tab.GUI.Window,
+	)
+	tab.ActionsImportA = widget.NewButtonWithIcon(
+		"Import Matrix A",
+		theme.UploadIcon(),
+		func() {
+			tab.ActionsImportADialog.Show()
+		},
+	)
+	tab.ActionsImportAContainer = container.NewPadded(tab.ActionsImportA)
+
+	tab.ActionsImportBDialog = dialog.NewFileOpen(
+		func(uri fyne.URIReadCloser, err error) {
+			if uri == nil || err != nil {
+				return
+			}
+
+			matrix, err := cmatrix.ReadSlow(uri.URI().Path())
+			if err != nil {
+				return
+			}
+
+			tab.MatrixB, _ = cmatrix.NewMatrix(matrix, false)
+			tab.Common.Set(tab.MatrixB.Rows)
+			tab.Cols.Set(tab.MatrixB.Cols)
+			tab.TableA.Refresh()
+			tab.TableB.Refresh()
+			tab.TableResult.Refresh()
+		},
+		tab.GUI.Window,
+	)
+	tab.ActionsImportB = widget.NewButtonWithIcon(
+		"Import Matrix B",
+		theme.UploadIcon(),
+		func() {
+			tab.ActionsImportBDialog.Show()
+		},
+	)
+	tab.ActionsImportBContainer = container.NewPadded(tab.ActionsImportB)
+
+	tab.ActionsOptions = container.NewHBox(
+		container.NewVBox(
+			tab.ActionsCommonContainer,
+			tab.ActionsRowsContainer,
+			tab.ActionsColsContainer,
+		), container.NewVBox(
+			tab.ActionsImportAContainer,
+			tab.ActionsImportBContainer,
+		))
 
 	tab.ActionsContainer = container.NewPadded(
 		tab.ActionsOptions,
