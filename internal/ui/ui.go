@@ -205,9 +205,15 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab.TableB = createTable(&tab.MatrixB)
 	tab.TableResult = createTable(&tab.MatrixResult)
 
-	tab.TableAContainer = container.NewPadded(tab.TableA)
-	tab.TableBContainer = container.NewPadded(tab.TableB)
-	tab.TableResultContainer = container.NewPadded(tab.TableResult)
+	tab.TableAContainer = container.NewPadded(container.NewBorder(
+		container.NewCenter(widget.NewLabelWithStyle(
+			"Matrix A", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})), nil, nil, nil, tab.TableA))
+	tab.TableBContainer = container.NewPadded(container.NewBorder(
+		container.NewCenter(widget.NewLabelWithStyle(
+			"Matrix B", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})), nil, nil, nil, tab.TableB))
+	tab.TableResultContainer = container.NewPadded(container.NewBorder(
+		container.NewCenter(widget.NewLabelWithStyle(
+			"Result", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})), nil, nil, nil, tab.TableResult))
 
 	validator := func(s string) error {
 		value, err := strconv.Atoi(s)
