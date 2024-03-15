@@ -394,3 +394,8 @@ func (p *Matrix) ResizeCols(cols int) {
 		p.Data[i] = p.Data[i][:cols]
 	}
 }
+
+func (p *Matrix) Resize(rows, cols int) {
+	p.ResizeRows(rows)
+	p.ResizeCols(cols)
+}
