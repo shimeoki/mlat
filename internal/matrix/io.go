@@ -45,14 +45,7 @@ func Write[number Number](path string, matrix [][]number) error {
 
 	defer file.Close()
 
-	var sb strings.Builder
-
-	for _, row := range matrix {
-		sb.WriteString(ArrayToString(row, " "))
-		sb.WriteByte('\n')
-	}
-
-	file.WriteString(sb.String())
+	file.WriteString(MatrixToString(matrix, " "))
 
 	return nil
 }
@@ -109,4 +102,15 @@ func ArrayToString[number Number](array []number, separator string) string {
 	return strings.Trim(
 		strings.Replace(fmt.Sprint(array), " ", separator, -1), "[]",
 	)
+}
+
+func MatrixToString[number Number](matrix [][]number, separator string) string {
+	var sb strings.Builder
+
+	for _, row := range matrix {
+		sb.WriteString(ArrayToString(row, " "))
+		sb.WriteByte('\n')
+	}
+
+	return sb.String()
 }
