@@ -332,15 +332,23 @@ func (p *Matrix) AddCol(index int) {
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols+1)
 
 	for i := range matrix {
-		matrix[i] = memory[(i * p.Cols+1):(i + 1) * p.Cols+1]
+		matrix[i] = memory[(i*p.Cols + 1) : (i+1)*p.Cols+1]
 		copy(
-			matrix[i], 
+			matrix[i],
 			slices.Concat(
-				p.Data[i][:index], 
-				make([]float64, 1), 
+				p.Data[i][:index],
+				make([]float64, 1),
 				p.Data[i][index:]),
 		)
 	}
 
 	p.Data = matrix
+}
+
+func (p *Matrix) ExtendRows(rows int) {
+	if rows <= 0 {
+		return
+	}
+
+	p.Data = append(p.Data, make([]float64, rows))
 }
