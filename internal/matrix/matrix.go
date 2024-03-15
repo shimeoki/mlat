@@ -306,7 +306,7 @@ func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 }
 
 func (p *Matrix) AddRow(index int) {
-	if index <= 0 || index >= p.Rows {
+	if index < 0 || index >= p.Rows {
 		return
 	}
 
@@ -325,7 +325,7 @@ func (p *Matrix) AddRow(index int) {
 }
 
 func (p *Matrix) AddCol(index int) {
-	if index <= 0 || index >= p.Cols {
+	if index < 0 || index >= p.Cols {
 		return
 	}
 
