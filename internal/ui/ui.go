@@ -214,9 +214,11 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		if err != nil {
 			return err
 		}
-		if value <= 0 {
-			return errors.New("error: value is 0 or less")
+
+		if value <= 0 || value >= 100 {
+			return errors.New("error: value is not in range (0, 100]")
 		}
+
 		return nil
 	}
 
