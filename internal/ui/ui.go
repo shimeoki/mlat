@@ -197,7 +197,9 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 	tab.Cols = binding.NewInt()
 	tab.Cols.Set(1)
 
-	tab.MatrixA, tab.MatrixB, tab.MatrixResult = nil, nil, nil
+	tab.MatrixA, _ = cmatrix.NewBlankMatrix(1, 1, false)
+	tab.MatrixB, _ = cmatrix.NewBlankMatrix(1, 1, false)
+	tab.MatrixResult, _ = cmatrix.NewBlankMatrix(1, 1, false)
 
 	tab.TableA = createTable(&tab.MatrixA)
 	tab.TableB = createTable(&tab.MatrixB)
