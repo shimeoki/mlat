@@ -110,3 +110,14 @@ func ArrayToString[number Number](array []number, separator string) string {
 		strings.Replace(fmt.Sprint(array), " ", separator, -1), "[]",
 	)
 }
+
+func MatrixToString[number Number](matrix [][]number, separator string) string {
+	var sb strings.Builder
+
+	for _, row := range matrix {
+		sb.WriteString(ArrayToString(row, " "))
+		sb.WriteByte('\n')
+	}
+
+	return sb.String()
+}
