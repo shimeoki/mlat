@@ -224,9 +224,15 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		binding.IntToString(tab.Common),
 	)
 	tab.ActionsCommon.OnChanged = func(s string) {
-		if value, err := strconv.Atoi(s); err == nil {
-			tab.Common.Set(value)
+		if tab.ActionsCommon.Validate() != nil {
+			return
 		}
+
+		common, _ := strconv.Atoi(s)
+		tab.MatrixA.ResizeCols(common)
+		tab.MatrixB.ResizeRows(common)
+		tab.TableA.Refresh()
+		tab.TableB.Refresh()
 	}
 	tab.ActionsCommon.Validator = validator
 	tab.ActionsCommonContainer = container.NewPadded(tab.ActionsCommon)
