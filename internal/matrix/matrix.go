@@ -362,3 +362,8 @@ func (p *Matrix) ExtendCols(cols int) {
 		p.Data[i] = append(p.Data[i], make([]float64, cols)...)
 	}
 }
+
+func (p *Matrix) Extend(rows, cols int) {
+	p.ExtendRows(rows)
+	p.ExtendCols(cols)
+}
