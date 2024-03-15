@@ -367,3 +367,15 @@ func (p *Matrix) Extend(rows, cols int) {
 	p.ExtendRows(rows)
 	p.ExtendCols(cols)
 }
+
+func (p *Matrix) ResizeRows(rows int) {
+	if rows <= 0 || rows == p.Rows {
+		return
+	}
+
+	if rows > p.Rows {
+		p.ExtendRows(p.Rows-rows)
+	} else {
+		p.Data = p.Data[:rows]
+	}
+}
