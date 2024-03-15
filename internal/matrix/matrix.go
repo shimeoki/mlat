@@ -379,3 +379,18 @@ func (p *Matrix) ResizeRows(rows int) {
 		p.Data = p.Data[:rows]
 	}
 }
+
+func (p *Matrix) ResizeCols(cols int) {
+	if cols <= 0 || cols == p.Cols {
+		return
+	}
+
+	if cols > p.Cols {
+		p.ExtendCols(p.Cols-cols)
+		return
+	}
+	
+	for i := range p.Data {
+		p.Data[i] = p.Data[i][:cols]
+	}
+}
