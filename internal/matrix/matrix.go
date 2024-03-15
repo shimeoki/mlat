@@ -47,7 +47,11 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
 
 func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
 	if matrix == nil {
-		return nil, nil
+		return nil, errors.New("error: matrix is nil")
+	}
+
+	if len(matrix) == 0 {
+		return nil, errors.New("error: matrix is empty")
 	}
 
 	rows, cols := len(matrix), len(matrix[0])
@@ -303,4 +307,99 @@ func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 	}
 
 	return newMatrix
+}
+
+func (p *Matrix) AddRow(index int) {
+	if index < 0 || index >= p.Rows {
+		return
+	}
+
+	matrix, memory, _ := Malloc[float64](p.Rows+1, p.Cols)
+
+	for i := range matrix {
+		matrix[i] = memory[(i * p.Cols):((i + 1) * p.Cols)]
+		if i < index {
+			copy(matrix[i], p.Data[i])
+		} else if i > index {
+			copy(matrix[i], p.Data[i-1])
+		}
+	}
+
+	p.Data = matrix
+}
+
+func (p *Matrix) AddCol(index int) {
+	if index < 0 || index >= p.Cols {
+		return
+	}
+
+	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols+1)
+
+	for i := range matrix {
+		matrix[i] = memory[(i*p.Cols + 1) : (i+1)*p.Cols+1]
+		copy(
+			matrix[i],
+			slices.Concat(
+				p.Data[i][:index],
+				make([]float64, 1),
+				p.Data[i][index:]),
+		)
+	}
+
+	p.Data = matrix
+}
+
+func (p *Matrix) ExtendRows(rows int) {
+	if rows <= 0 {
+		return
+	}
+
+	p.Data = append(p.Data, make([]float64, rows))
+}
+
+func (p *Matrix) ExtendCols(cols int) {
+	if cols <= 0 {
+		return
+	}
+
+	for i := range p.Data {
+		p.Data[i] = append(p.Data[i], make([]float64, cols)...)
+	}
+}
+
+func (p *Matrix) Extend(rows, cols int) {
+	p.ExtendRows(rows)
+	p.ExtendCols(cols)
+}
+
+func (p *Matrix) ResizeRows(rows int) {
+	if rows <= 0 || rows == p.Rows {
+		return
+	}
+
+	if rows > p.Rows {
+		p.ExtendRows(p.Rows-rows)
+	} else {
+		p.Data = p.Data[:rows]
+	}
+}
+
+func (p *Matrix) ResizeCols(cols int) {
+	if cols <= 0 || cols == p.Cols {
+		return
+	}
+
+	if cols > p.Cols {
+		p.ExtendCols(p.Cols-cols)
+		return
+	}
+	
+	for i := range p.Data {
+		p.Data[i] = p.Data[i][:cols]
+	}
+}
+
+func (p *Matrix) Resize(rows, cols int) {
+	p.ResizeRows(rows)
+	p.ResizeCols(cols)
 }
