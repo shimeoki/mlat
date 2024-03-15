@@ -304,3 +304,22 @@ func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 
 	return newMatrix
 }
+
+func (p *Matrix) AddRow(index int) {
+	if index <= 0 || index >= p.Rows {
+		return
+	}
+
+	matrix, memory, _ := Malloc[float64](p.Rows+1, p.Cols)
+
+	for i := range matrix {
+		matrix[i] = memory[(i * p.Cols):((i + 1) * p.Cols)]
+		if i < index {
+			copy(matrix[i], p.Data[i])
+		} else if i > index {
+			copy(matrix[i], p.Data[i-1])
+		}
+	}
+
+	p.Data = matrix
+}
