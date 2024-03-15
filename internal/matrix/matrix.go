@@ -352,3 +352,13 @@ func (p *Matrix) ExtendRows(rows int) {
 
 	p.Data = append(p.Data, make([]float64, rows))
 }
+
+func (p *Matrix) ExtendCols(cols int) {
+	if cols <= 0 {
+		return
+	}
+
+	for i := range p.Data {
+		p.Data[i] = append(p.Data[i], make([]float64, cols)...)
+	}
+}
