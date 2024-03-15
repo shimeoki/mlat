@@ -398,7 +398,7 @@ func (p *Matrix) ResizeRows(rows int) {
 	}
 
 	if rows > p.Rows {
-		p.ExtendRows(p.Rows-rows)
+		p.ExtendRows(rows-p.Rows)
 	} else {
 		p.Rows = rows
 		p.Data = p.Data[:rows]
@@ -411,7 +411,7 @@ func (p *Matrix) ResizeCols(cols int) {
 	}
 
 	if cols > p.Cols {
-		p.ExtendCols(p.Cols-cols)
+		p.ExtendCols(cols-p.Cols)
 		return
 	}
 	
