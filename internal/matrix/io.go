@@ -105,6 +105,12 @@ func ArrayToString[number Number](array []number, separator string) string {
 }
 
 func MatrixToString[number Number](matrix [][]number, separator string) string {
+	if matrix == nil {
+		return ""
+	} else if len(matrix) == 0 {
+		return ""
+	}
+
 	var sb strings.Builder
 
 	for _, row := range matrix {
