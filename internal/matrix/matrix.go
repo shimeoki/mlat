@@ -47,7 +47,11 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
 
 func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
 	if matrix == nil {
-		return nil, nil
+		return nil, errors.New("error: matrix is nil")
+	}
+
+	if len(matrix) == 0 {
+		return nil, errors.New("error: matrix is empty")
 	}
 
 	rows, cols := len(matrix), len(matrix[0])
