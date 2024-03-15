@@ -336,7 +336,7 @@ func (p *Matrix) AddCol(index int) {
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols+1)
 
 	for i := range matrix {
-		matrix[i] = memory[(i*p.Cols + 1) : (i+1)*p.Cols+1]
+		matrix[i] = memory[(i*(p.Cols+1)):(i+1)*(p.Cols+1)]
 		copy(
 			matrix[i],
 			slices.Concat(
