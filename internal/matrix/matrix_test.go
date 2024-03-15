@@ -204,7 +204,49 @@ func TestExtendCols(t *testing.T) {
 }
 
 func TestResizeRows(t *testing.T) {
+	tests := []struct {
+		name   string
+		matrix [][]float64
+		arg    int
+		want   string
+	}{
+		{ "arg -1", matrix2, -1, "0\n" },
+		{ "arg 0", matrix2, 0, "0\n" },
+		{ "arg 1 with 1 0-elem", matrix2, 1, "0\n" },
+		{ "arg 2 with 1 0-elem", matrix2, 2, "0\n0\n" },
+		{ "arg 3 with 1 0-elem", matrix2, 3, "0\n0\n0\n" },
+		{ "arg 1 with 0-row", matrix3, 1, "0 0 0\n" },
+		{ "arg 2 with 0-row", matrix3, 2, "0 0 0\n0 0 0\n" },
+		{ "arg 3 with 0-row", matrix3, 3, "0 0 0\n0 0 0\n0 0 0\n" },
+		{ "arg 1 with three 0-rows", matrix4, 1, "0 0 0\n" },
+		{ "arg 2 with three 0-rows", matrix4, 2, "0 0 0\n0 0 0\n" },
+		{ "arg 3 with three 0-rows", matrix4, 3, "0 0 0\n0 0 0\n0 0 0\n" },
+		{ "arg 4 with three 0-rows", matrix4, 4, "0 0 0\n0 0 0\n0 0 0\n0 0 0\n" },
+		{ "arg 5 with three 0-rows", matrix4, 5, "0 0 0\n0 0 0\n0 0 0\n0 0 0\n0 0 0\n" },
+		{ "arg 1 with row", matrix5, 1, "1 2 3\n" },
+		{ "arg 2 with row", matrix5, 2, "1 2 3\n0 0 0\n" },
+		{ "arg 3 with row", matrix5, 3, "1 2 3\n0 0 0\n0 0 0\n" },
+		{ "arg 1 with three rows", matrix6, 1, "1 2 3\n" },
+		{ "arg 2 with three rows", matrix6, 2, "1 2 3\n4 5 6\n" },
+		{ "arg 3 with three rows", matrix6, 3, "1 2 3\n4 5 6\n7 8 9\n" },
+		{ "arg 4 with three rows", matrix6, 4, "1 2 3\n4 5 6\n7 8 9\n0 0 0\n" },
+		{ "arg 5 with three rows", matrix6, 5, "1 2 3\n4 5 6\n7 8 9\n0 0 0\n0 0 0\n" },
+	}
 
+	for _, test := range tests {
+		t.Run(test.name,
+			func(t *testing.T) {
+				matrix, err := NewMatrix(test.matrix, false)
+				if err != nil {
+					return
+				}
+				matrix.ResizeRows(test.arg)
+				ans := MatrixToString(matrix.Data, " ")
+				if ans != test.want {
+					t.Errorf("\ngot:\n%s\nwant:\n%s", ans, test.want)
+				}
+			})
+	}
 }
 
 func TestResizeCols(t *testing.T) {
