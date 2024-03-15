@@ -323,3 +323,24 @@ func (p *Matrix) AddRow(index int) {
 
 	p.Data = matrix
 }
+
+func (p *Matrix) AddCol(index int) {
+	if index <= 0 || index >= p.Cols {
+		return
+	}
+
+	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols+1)
+
+	for i := range matrix {
+		matrix[i] = memory[(i * p.Cols+1):(i + 1) * p.Cols+1]
+		copy(
+			matrix[i], 
+			slices.Concat(
+				p.Data[i][:index], 
+				make([]float64, 1), 
+				p.Data[i][index:]),
+		)
+	}
+
+	p.Data = matrix
+}
