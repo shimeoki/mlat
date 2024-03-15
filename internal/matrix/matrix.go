@@ -46,17 +46,26 @@ func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
 }
 
 func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
-	if matrix == nil {
+	if matrix == nil || matrix[0] == nil {
 		return nil, errors.New("error: matrix is nil")
 	}
 
-	if len(matrix) == 0 {
-		return nil, errors.New("error: matrix is empty")
+	rows, cols := len(matrix), len(matrix[0])
+	if rows == 0 || cols == 0 {
+		return nil, errors.New("error: matrix has empty rows or cols")
+	}
+	
+	cmatrix, memory, _ := Malloc[float64](rows, cols)
+	for i := 0; i < rows; i++ {
+		if len(matrix[i]) != cols {
+			return nil, errors.New("error: matrix is invalid")
+		}
+		cmatrix[i] = memory[(i * cols):((i + 1) * cols)]
+		copy(cmatrix[i], matrix[i])
 	}
 
-	rows, cols := len(matrix), len(matrix[0])
 	return &Matrix{
-		matrix,
+		cmatrix,
 		rows,
 		cols,
 		augmented,
@@ -314,8 +323,8 @@ func (p *Matrix) AddRow(index int) {
 		return
 	}
 
-	matrix, memory, _ := Malloc[float64](p.Rows+1, p.Cols)
-
+	p.Rows++
+	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
 		matrix[i] = memory[(i * p.Cols):((i + 1) * p.Cols)]
 		if i < index {
@@ -333,10 +342,10 @@ func (p *Matrix) AddCol(index int) {
 		return
 	}
 
-	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols+1)
-
+	p.Cols++
+	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[(i*p.Cols + 1) : (i+1)*p.Cols+1]
+		matrix[i] = memory[(i*p.Cols):(i+1)*p.Cols]
 		copy(
 			matrix[i],
 			slices.Concat(
@@ -354,7 +363,13 @@ func (p *Matrix) ExtendRows(rows int) {
 		return
 	}
 
-	p.Data = append(p.Data, make([]float64, rows))
+	p.Rows += rows
+	matrix, memory, _ := Malloc[float64](rows, p.Cols)
+	for i := range matrix {
+		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+	}
+
+	p.Data = append(p.Data, matrix...)
 }
 
 func (p *Matrix) ExtendCols(cols int) {
@@ -362,9 +377,14 @@ func (p *Matrix) ExtendCols(cols int) {
 		return
 	}
 
-	for i := range p.Data {
-		p.Data[i] = append(p.Data[i], make([]float64, cols)...)
+	p.Cols += cols
+	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
+	for i := range matrix {
+		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+		copy(matrix[i], p.Data[i])
 	}
+
+	p.Data = matrix
 }
 
 func (p *Matrix) Extend(rows, cols int) {
@@ -380,6 +400,7 @@ func (p *Matrix) ResizeRows(rows int) {
 	if rows > p.Rows {
 		p.ExtendRows(p.Rows-rows)
 	} else {
+		p.Rows = rows
 		p.Data = p.Data[:rows]
 	}
 }
@@ -394,6 +415,7 @@ func (p *Matrix) ResizeCols(cols int) {
 		return
 	}
 	
+	p.Cols = cols
 	for i := range p.Data {
 		p.Data[i] = p.Data[i][:cols]
 	}
