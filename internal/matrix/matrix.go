@@ -54,7 +54,7 @@ func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
 	if rows == 0 || cols == 0 {
 		return nil, errors.New("error: matrix has empty rows or cols")
 	}
-	
+
 	cmatrix, memory, _ := Malloc[float64](rows, cols)
 	for i := 0; i < rows; i++ {
 		if len(matrix[i]) != cols {
@@ -345,7 +345,7 @@ func (p *Matrix) AddCol(index int) {
 	p.Cols++
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[(i*p.Cols):(i+1)*p.Cols]
+		matrix[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
 		copy(
 			matrix[i],
 			slices.Concat(
@@ -366,7 +366,7 @@ func (p *Matrix) ExtendRows(rows int) {
 	p.Rows += rows
 	matrix, memory, _ := Malloc[float64](rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
 	}
 
 	p.Data = append(p.Data, matrix...)
@@ -380,7 +380,7 @@ func (p *Matrix) ExtendCols(cols int) {
 	p.Cols += cols
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
 		copy(matrix[i], p.Data[i])
 	}
 
@@ -398,7 +398,7 @@ func (p *Matrix) ResizeRows(rows int) {
 	}
 
 	if rows > p.Rows {
-		p.ExtendRows(rows-p.Rows)
+		p.ExtendRows(rows - p.Rows)
 	} else {
 		p.Rows = rows
 		p.Data = p.Data[:rows]
@@ -411,10 +411,10 @@ func (p *Matrix) ResizeCols(cols int) {
 	}
 
 	if cols > p.Cols {
-		p.ExtendCols(cols-p.Cols)
+		p.ExtendCols(cols - p.Cols)
 		return
 	}
-	
+
 	p.Cols = cols
 	for i := range p.Data {
 		p.Data[i] = p.Data[i][:cols]
@@ -438,13 +438,13 @@ func (p *Matrix) Write(data [][]float64) error {
 			return errors.New("error: data is not rectangle-shaped")
 		}
 
-		matrix[i] = memory[(i * cols):((i+1) * cols)]
+		matrix[i] = memory[(i * cols):((i + 1) * cols)]
 		copy(matrix[i], data[i])
 	}
-	
+
 	p.Data = matrix
 	p.Rows = rows
 	p.Cols = cols
-	
+
 	return nil
 }
