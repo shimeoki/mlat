@@ -23,56 +23,35 @@ type Matrix struct {
 }
 
 func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
-	if rows <= 0 || cols <= 0 {
-		return nil, errors.New("shape is invalid")
+	m := &Matrix{}
+
+	err := m.WriteBlank(rows, cols)
+	if err != nil {
+		return nil, err
 	}
 
-	// create matrix with contiguous memory allocation
-	matrix, memory, _ := Malloc[float64](rows, cols)
-	for i := 0; i < rows; i++ {
-		matrix[i] = memory[(i * cols):((i + 1) * cols)]
-	}
+	m.Augmented = augmented
+	m.Square = isSquare(m.Augmented, m.Rows, m.Cols)
+	m.Determinants = makeDets(m.Augmented, m.Cols)
+	m.Roots = makeRoots(m.Augmented, m.Cols)
 
-	// return pointer to new matrix
-	return &Matrix{
-		matrix,
-		rows,
-		cols,
-		augmented,
-		isSquare(augmented, rows, cols),
-		makeDets(augmented, cols),
-		makeRoots(augmented, cols),
-	}, nil
+	return m, nil
 }
 
-func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
-	if matrix == nil || matrix[0] == nil {
-		return nil, errors.New("error: matrix is nil")
+func NewMatrix(data [][]float64, augmented bool) (*Matrix, error) {
+	m := &Matrix{}
+
+	err := m.Write(data)
+	if err != nil {
+		return nil, err
 	}
 
-	rows, cols := len(matrix), len(matrix[0])
-	if rows == 0 || cols == 0 {
-		return nil, errors.New("error: matrix has empty rows or cols")
-	}
+	m.Augmented = augmented
+	m.Square = isSquare(m.Augmented, m.Rows, m.Cols)
+	m.Determinants = makeDets(m.Augmented, m.Cols)
+	m.Roots = makeRoots(m.Augmented, m.Cols)
 
-	cmatrix, memory, _ := Malloc[float64](rows, cols)
-	for i := 0; i < rows; i++ {
-		if len(matrix[i]) != cols {
-			return nil, errors.New("error: matrix is invalid")
-		}
-		cmatrix[i] = memory[(i * cols):((i + 1) * cols)]
-		copy(cmatrix[i], matrix[i])
-	}
-
-	return &Matrix{
-		cmatrix,
-		rows,
-		cols,
-		augmented,
-		isSquare(augmented, rows, cols),
-		makeDets(augmented, cols),
-		makeRoots(augmented, cols),
-	}, nil
+	return m, nil
 }
 
 func (p *Matrix) FillRandom(upper int) error {
