@@ -425,3 +425,23 @@ func (p *Matrix) Resize(rows, cols int) {
 	p.ResizeRows(rows)
 	p.ResizeCols(cols)
 }
+
+func (p *Matrix) Write(data [][]float64) error {
+	if data == nil || data[0] == nil {
+		return errors.New("error: data is nil")
+	}
+
+	rows, cols := len(data), len(data[0])
+	matrix, memory, _ := Malloc[float64](rows, cols)
+	for i := 0; i < rows; i++ {
+		if len(data[i]) != cols {
+			return errors.New("error: data is not rectangle-shaped")
+		}
+
+		matrix[i] = memory[(i * cols):((i+1) * cols)]
+		copy(matrix[i], data[i])
+	}
+	
+	p.Data = matrix
+	return nil
+}
