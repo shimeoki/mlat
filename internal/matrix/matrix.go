@@ -448,3 +448,20 @@ func (p *Matrix) Write(data [][]float64) error {
 
 	return nil
 }
+
+func (p *Matrix) WriteBlank(rows, cols int) error {
+	if rows <= 0 || cols <= 0 {
+		return errors.New("error: rows or cols equal or less than zero")
+	}
+
+	matrix, memory, _ := Malloc[float64](rows, cols)
+	for i := 0; i < rows; i++ {
+		matrix[i] = memory[(i * cols):((i + 1) * cols)]
+	}
+
+	p.Data = matrix
+	p.Rows = rows
+	p.Cols = cols
+
+	return nil
+}
