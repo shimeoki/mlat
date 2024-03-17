@@ -443,5 +443,8 @@ func (p *Matrix) Write(data [][]float64) error {
 	}
 	
 	p.Data = matrix
+	p.Rows = rows
+	p.Cols = cols
 	return nil
+	
 }
