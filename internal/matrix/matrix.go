@@ -23,56 +23,35 @@ type Matrix struct {
 }
 
 func NewBlankMatrix(rows, cols int, augmented bool) (*Matrix, error) {
-	if rows <= 0 || cols <= 0 {
-		return nil, errors.New("shape is invalid")
+	m := &Matrix{}
+
+	err := m.WriteBlank(rows, cols)
+	if err != nil {
+		return nil, err
 	}
 
-	// create matrix with contiguous memory allocation
-	matrix, memory, _ := Malloc[float64](rows, cols)
-	for i := 0; i < rows; i++ {
-		matrix[i] = memory[(i * cols):((i + 1) * cols)]
-	}
+	m.Augmented = augmented
+	m.Square = isSquare(m.Augmented, m.Rows, m.Cols)
+	m.Determinants = makeDets(m.Augmented, m.Cols)
+	m.Roots = makeRoots(m.Augmented, m.Cols)
 
-	// return pointer to new matrix
-	return &Matrix{
-		matrix,
-		rows,
-		cols,
-		augmented,
-		isSquare(augmented, rows, cols),
-		makeDets(augmented, cols),
-		makeRoots(augmented, cols),
-	}, nil
+	return m, nil
 }
 
-func NewMatrix(matrix [][]float64, augmented bool) (*Matrix, error) {
-	if matrix == nil || matrix[0] == nil {
-		return nil, errors.New("error: matrix is nil")
+func NewMatrix(data [][]float64, augmented bool) (*Matrix, error) {
+	m := &Matrix{}
+
+	err := m.Write(data)
+	if err != nil {
+		return nil, err
 	}
 
-	rows, cols := len(matrix), len(matrix[0])
-	if rows == 0 || cols == 0 {
-		return nil, errors.New("error: matrix has empty rows or cols")
-	}
-	
-	cmatrix, memory, _ := Malloc[float64](rows, cols)
-	for i := 0; i < rows; i++ {
-		if len(matrix[i]) != cols {
-			return nil, errors.New("error: matrix is invalid")
-		}
-		cmatrix[i] = memory[(i * cols):((i + 1) * cols)]
-		copy(cmatrix[i], matrix[i])
-	}
+	m.Augmented = augmented
+	m.Square = isSquare(m.Augmented, m.Rows, m.Cols)
+	m.Determinants = makeDets(m.Augmented, m.Cols)
+	m.Roots = makeRoots(m.Augmented, m.Cols)
 
-	return &Matrix{
-		cmatrix,
-		rows,
-		cols,
-		augmented,
-		isSquare(augmented, rows, cols),
-		makeDets(augmented, cols),
-		makeRoots(augmented, cols),
-	}, nil
+	return m, nil
 }
 
 func (p *Matrix) FillRandom(upper int) error {
@@ -345,7 +324,7 @@ func (p *Matrix) AddCol(index int) {
 	p.Cols++
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[(i*p.Cols):(i+1)*p.Cols]
+		matrix[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
 		copy(
 			matrix[i],
 			slices.Concat(
@@ -366,7 +345,7 @@ func (p *Matrix) ExtendRows(rows int) {
 	p.Rows += rows
 	matrix, memory, _ := Malloc[float64](rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
 	}
 
 	p.Data = append(p.Data, matrix...)
@@ -380,7 +359,7 @@ func (p *Matrix) ExtendCols(cols int) {
 	p.Cols += cols
 	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols:(i+1)*p.Cols]
+		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
 		copy(matrix[i], p.Data[i])
 	}
 
@@ -398,7 +377,7 @@ func (p *Matrix) ResizeRows(rows int) {
 	}
 
 	if rows > p.Rows {
-		p.ExtendRows(rows-p.Rows)
+		p.ExtendRows(rows - p.Rows)
 	} else {
 		p.Rows = rows
 		p.Data = p.Data[:rows]
@@ -411,10 +390,10 @@ func (p *Matrix) ResizeCols(cols int) {
 	}
 
 	if cols > p.Cols {
-		p.ExtendCols(cols-p.Cols)
+		p.ExtendCols(cols - p.Cols)
 		return
 	}
-	
+
 	p.Cols = cols
 	for i := range p.Data {
 		p.Data[i] = p.Data[i][:cols]
@@ -424,4 +403,44 @@ func (p *Matrix) ResizeCols(cols int) {
 func (p *Matrix) Resize(rows, cols int) {
 	p.ResizeRows(rows)
 	p.ResizeCols(cols)
+}
+
+func (p *Matrix) Write(data [][]float64) error {
+	if data == nil || data[0] == nil {
+		return errors.New("error: data is nil")
+	}
+
+	rows, cols := len(data), len(data[0])
+	matrix, memory, _ := Malloc[float64](rows, cols)
+	for i := 0; i < rows; i++ {
+		if len(data[i]) != cols {
+			return errors.New("error: data is not rectangle-shaped")
+		}
+
+		matrix[i] = memory[(i * cols):((i + 1) * cols)]
+		copy(matrix[i], data[i])
+	}
+
+	p.Data = matrix
+	p.Rows = rows
+	p.Cols = cols
+
+	return nil
+}
+
+func (p *Matrix) WriteBlank(rows, cols int) error {
+	if rows <= 0 || cols <= 0 {
+		return errors.New("error: rows or cols equal or less than zero")
+	}
+
+	matrix, memory, _ := Malloc[float64](rows, cols)
+	for i := 0; i < rows; i++ {
+		matrix[i] = memory[(i * cols):((i + 1) * cols)]
+	}
+
+	p.Data = matrix
+	p.Rows = rows
+	p.Cols = cols
+
+	return nil
 }
