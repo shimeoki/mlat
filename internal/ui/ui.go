@@ -112,13 +112,24 @@ func createTable(matrix **cmatrix.Matrix) (table *widget.Table) {
 			return cell
 		},
 		func(cellID widget.TableCellID, cell fyne.CanvasObject) {
+			cellEntry := cell.(*widget.Entry)
 			var text string
 			if *matrix == nil {
 				text = "nil"
 			} else {
+				if cellEntry.OnChanged == nil {
+					cellEntry.OnChanged = func(s string) {
+						value, err := strconv.ParseFloat(s, 64)
+						if err != nil {
+							return
+						}
+
+						(*matrix).Data[cellID.Row][cellID.Col] = value
+					}
+				}
 				text = fmt.Sprintf("%v", (*matrix).Data[cellID.Row][cellID.Col])
 			}
-			cell.(*widget.Entry).SetText(text)
+			cellEntry.SetText(text)
 		},
 	)
 	table.CreateHeader = func() fyne.CanvasObject {
@@ -352,7 +363,13 @@ func (p *GUI) newMultiplyTab() *MultiplyTab {
 		"Calculate",
 		theme.GridIcon(),
 		func() {
-			// functionality needed
+			matrixResultData := tab.MatrixA.Multiply(tab.MatrixB)
+			if matrixResultData == nil {
+				return
+			}
+
+			tab.MatrixResult, _ = cmatrix.NewMatrix(matrixResultData, false)
+			tab.TableResult.Refresh()
 		},
 	)
 	tab.ActionsCalculateContainer = container.NewPadded(tab.ActionsCalculate)
