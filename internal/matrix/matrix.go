@@ -411,6 +411,10 @@ func (p *Matrix) Write(data [][]float64) error {
 	}
 
 	rows, cols := len(data), len(data[0])
+	if rows == 0 || cols == 0 {
+		return errors.New("error: data is empty")
+	}
+
 	matrix, memory, _ := Malloc[float64](rows, cols)
 	for i := 0; i < rows; i++ {
 		if len(data[i]) != cols {
