@@ -54,14 +54,14 @@ func NewMatrix(data [][]float64, augmented bool) (*Matrix, error) {
 	return m, nil
 }
 
-func (p *Matrix) FillRandom(upper int) error {
+func (m *Matrix) FillRandom(upper int) error {
 	if upper <= 0 {
 		return errors.New("upper limit is invalid")
 	}
 
-	for i := 0; i < p.Rows; i++ {
-		for j := 0; j < p.Cols; j++ {
-			p.Data[i][j] = rand.Float64() * float64(upper)
+	for i := 0; i < m.Rows; i++ {
+		for j := 0; j < m.Cols; j++ {
+			m.Data[i][j] = rand.Float64() * float64(upper)
 		}
 	}
 
@@ -114,36 +114,36 @@ func Malloc[number Number](rows, cols int) ([][]number, []number, error) {
 //
 // if matrix is not augmented, returns [1]number.
 // otherwise returns [cols]number
-func (p *Matrix) Calculate() ([]float64, error) {
-	if !p.Square {
+func (m *Matrix) Calculate() ([]float64, error) {
+	if !m.Square {
 		return nil, errors.New("matrix is not a square")
 	}
 
-	if !p.Augmented {
-		p.Determinants[0] = calcDet(p.Data)
+	if !m.Augmented {
+		m.Determinants[0] = calcDet(m.Data)
 	} else {
-		p.Determinants = calcDets(p.Data)
+		m.Determinants = calcDets(m.Data)
 
-		if p.Determinants[0] != 0 {
-			for i := range p.Cols - 1 {
-				p.Roots[i] = float64(p.Determinants[i+1]) / float64(p.Determinants[0])
+		if m.Determinants[0] != 0 {
+			for i := range m.Cols - 1 {
+				m.Roots[i] = float64(m.Determinants[i+1]) / float64(m.Determinants[0])
 			}
 		}
 	}
 
-	return p.Determinants, nil
+	return m.Determinants, nil
 }
 
-func (p *Matrix) GetRoots() []float64 {
-	if p.Determinants[0] == 0 || p.Determinants == nil || !p.Augmented {
+func (m *Matrix) GetRoots() []float64 {
+	if m.Determinants[0] == 0 || m.Determinants == nil || !m.Augmented {
 		return nil
 	}
 
-	for i := range p.Cols - 1 {
-		p.Roots[i] = float64(p.Determinants[i+1]) / float64(p.Determinants[0])
+	for i := range m.Cols - 1 {
+		m.Roots[i] = float64(m.Determinants[i+1]) / float64(m.Determinants[0])
 	}
 
-	return p.Roots
+	return m.Roots
 }
 
 func calcDets[number Number](matrix [][]number) []number {
@@ -221,10 +221,10 @@ func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix 
 	return
 }
 
-func (p *Matrix) String() string {
-	rows := make([]string, p.Rows)
+func (m *Matrix) String() string {
+	rows := make([]string, m.Rows)
 
-	for i, row := range p.Data {
+	for i, row := range m.Data {
 		rows[i] = fmt.Sprint(row)
 	}
 
@@ -255,20 +255,20 @@ func replaceColInAugmented[number Number](matrix [][]number, index int) (newMatr
 	return
 }
 
-func (p *Matrix) GetAdjugate() (newMatrix [][]float64) {
-	if !p.Square {
+func (m *Matrix) GetAdjugate() (newMatrix [][]float64) {
+	if !m.Square {
 		return nil
 	}
 
-	adjugate, memory, _ := Malloc[float64](p.Rows, p.Cols)
-	for i := range p.Rows {
-		adjugate[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
-		for j := range p.Cols {
-			cellValue := p.Data[i][j]
+	adjugate, memory, _ := Malloc[float64](m.Rows, m.Cols)
+	for i := range m.Rows {
+		adjugate[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
+		for j := range m.Cols {
+			cellValue := m.Data[i][j]
 			if (i+j)%2 != 0 {
 				cellValue = -cellValue
 			}
-			matrix := deleteRowAndCol(p.Data, i, j)
+			matrix := deleteRowAndCol(m.Data, i, j)
 			adjugate[i][j] = cellValue * calcDet(matrix)
 		}
 	}
@@ -276,19 +276,19 @@ func (p *Matrix) GetAdjugate() (newMatrix [][]float64) {
 	return adjugate
 }
 
-func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
-	if p.Cols != matrix.Rows {
+func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
+	if m.Cols != matrix.Rows {
 		return nil
 	}
 
-	rows, cols := p.Rows, matrix.Cols
+	rows, cols := m.Rows, matrix.Cols
 	newMatrix, memory, _ := Malloc[float64](rows, cols)
 	for i := range rows {
 		newMatrix[i] = memory[i*cols : (i+1)*cols]
 		for j := range cols {
 			cellValue := 0.0
-			for k := range p.Cols {
-				cellValue += p.Data[i][k] * matrix.Data[k][j]
+			for k := range m.Cols {
+				cellValue += m.Data[i][k] * matrix.Data[k][j]
 			}
 			newMatrix[i][j] = cellValue
 		}
@@ -297,115 +297,115 @@ func (p *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 	return newMatrix
 }
 
-func (p *Matrix) AddRow(index int) {
-	if index < 0 || index >= p.Rows {
+func (m *Matrix) AddRow(index int) {
+	if index < 0 || index >= m.Rows {
 		return
 	}
 
-	p.Rows++
-	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
+	m.Rows++
+	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
 	for i := range matrix {
-		matrix[i] = memory[(i * p.Cols):((i + 1) * p.Cols)]
+		matrix[i] = memory[(i * m.Cols):((i + 1) * m.Cols)]
 		if i < index {
-			copy(matrix[i], p.Data[i])
+			copy(matrix[i], m.Data[i])
 		} else if i > index {
-			copy(matrix[i], p.Data[i-1])
+			copy(matrix[i], m.Data[i-1])
 		}
 	}
 
-	p.Data = matrix
+	m.Data = matrix
 }
 
-func (p *Matrix) AddCol(index int) {
-	if index < 0 || index >= p.Cols {
+func (m *Matrix) AddCol(index int) {
+	if index < 0 || index >= m.Cols {
 		return
 	}
 
-	p.Cols++
-	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
+	m.Cols++
+	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
 	for i := range matrix {
-		matrix[i] = memory[(i * p.Cols) : (i+1)*p.Cols]
+		matrix[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
 		copy(
 			matrix[i],
 			slices.Concat(
-				p.Data[i][:index],
+				m.Data[i][:index],
 				make([]float64, 1),
-				p.Data[i][index:]),
+				m.Data[i][index:]),
 		)
 	}
 
-	p.Data = matrix
+	m.Data = matrix
 }
 
-func (p *Matrix) ExtendRows(rows int) {
+func (m *Matrix) ExtendRows(rows int) {
 	if rows <= 0 {
 		return
 	}
 
-	p.Rows += rows
-	matrix, memory, _ := Malloc[float64](rows, p.Cols)
+	m.Rows += rows
+	matrix, memory, _ := Malloc[float64](rows, m.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
+		matrix[i] = memory[i*m.Cols : (i+1)*m.Cols]
 	}
 
-	p.Data = append(p.Data, matrix...)
+	m.Data = append(m.Data, matrix...)
 }
 
-func (p *Matrix) ExtendCols(cols int) {
+func (m *Matrix) ExtendCols(cols int) {
 	if cols <= 0 {
 		return
 	}
 
-	p.Cols += cols
-	matrix, memory, _ := Malloc[float64](p.Rows, p.Cols)
+	m.Cols += cols
+	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
 	for i := range matrix {
-		matrix[i] = memory[i*p.Cols : (i+1)*p.Cols]
-		copy(matrix[i], p.Data[i])
+		matrix[i] = memory[i*m.Cols : (i+1)*m.Cols]
+		copy(matrix[i], m.Data[i])
 	}
 
-	p.Data = matrix
+	m.Data = matrix
 }
 
-func (p *Matrix) Extend(rows, cols int) {
-	p.ExtendRows(rows)
-	p.ExtendCols(cols)
+func (m *Matrix) Extend(rows, cols int) {
+	m.ExtendRows(rows)
+	m.ExtendCols(cols)
 }
 
-func (p *Matrix) ResizeRows(rows int) {
-	if rows <= 0 || rows == p.Rows {
+func (m *Matrix) ResizeRows(rows int) {
+	if rows <= 0 || rows == m.Rows {
 		return
 	}
 
-	if rows > p.Rows {
-		p.ExtendRows(rows - p.Rows)
+	if rows > m.Rows {
+		m.ExtendRows(rows - m.Rows)
 	} else {
-		p.Rows = rows
-		p.Data = p.Data[:rows]
+		m.Rows = rows
+		m.Data = m.Data[:rows]
 	}
 }
 
-func (p *Matrix) ResizeCols(cols int) {
-	if cols <= 0 || cols == p.Cols {
+func (m *Matrix) ResizeCols(cols int) {
+	if cols <= 0 || cols == m.Cols {
 		return
 	}
 
-	if cols > p.Cols {
-		p.ExtendCols(cols - p.Cols)
+	if cols > m.Cols {
+		m.ExtendCols(cols - m.Cols)
 		return
 	}
 
-	p.Cols = cols
-	for i := range p.Data {
-		p.Data[i] = p.Data[i][:cols]
+	m.Cols = cols
+	for i := range m.Data {
+		m.Data[i] = m.Data[i][:cols]
 	}
 }
 
-func (p *Matrix) Resize(rows, cols int) {
-	p.ResizeRows(rows)
-	p.ResizeCols(cols)
+func (m *Matrix) Resize(rows, cols int) {
+	m.ResizeRows(rows)
+	m.ResizeCols(cols)
 }
 
-func (p *Matrix) Write(data [][]float64) error {
+func (m *Matrix) Write(data [][]float64) error {
 	if data == nil || data[0] == nil {
 		return errors.New("error: data is nil")
 	}
@@ -421,14 +421,14 @@ func (p *Matrix) Write(data [][]float64) error {
 		copy(matrix[i], data[i])
 	}
 
-	p.Data = matrix
-	p.Rows = rows
-	p.Cols = cols
+	m.Data = matrix
+	m.Rows = rows
+	m.Cols = cols
 
 	return nil
 }
 
-func (p *Matrix) WriteBlank(rows, cols int) error {
+func (m *Matrix) WriteBlank(rows, cols int) error {
 	if rows <= 0 || cols <= 0 {
 		return errors.New("error: rows or cols equal or less than zero")
 	}
@@ -438,9 +438,9 @@ func (p *Matrix) WriteBlank(rows, cols int) error {
 		matrix[i] = memory[(i * cols):((i + 1) * cols)]
 	}
 
-	p.Data = matrix
-	p.Rows = rows
-	p.Cols = cols
+	m.Data = matrix
+	m.Rows = rows
+	m.Cols = cols
 
 	return nil
 }
