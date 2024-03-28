@@ -135,7 +135,11 @@ func (m *Matrix) Calculate() ([]float64, error) {
 }
 
 func (m *Matrix) GetRoots() []float64 {
-	if m.Determinants[0] == 0 || m.Determinants == nil || !m.Augmented {
+	if m.Determinants == nil {
+		return nil
+	}
+
+	if m.Determinants[0] == 0 || !m.Augmented {
 		return nil
 	}
 
