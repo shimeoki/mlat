@@ -139,17 +139,21 @@ func makeRoots(augmented bool, cols int) []float64 {
 	}
 }
 
-// allocates memory closely for contingious memory allocation afterwards
-//
-//	for i := range matrix {
-//		matrix[i] = memory[(i * cols):((i + 1) * cols)]
-//	}
-func Malloc(rows, cols int) ([][]float64, []float64, error) {
+// Allocate memory for matrix in single allocation.
+// It is more efficient in terms of access speed.
+func Malloc(rows, cols int) ([][]float64, error) {
 	if rows <= 0 || cols <= 0 {
-		return nil, nil, errors.New("invalid row or column value")
+		return nil, NewError("malloc: rows or cols equal or less than zero")
 	}
 
-	return make([][]float64, rows), make([]float64, rows*cols), nil
+	matrix := make([][]float64, rows)
+	memory := make([]float64, rows*cols)
+
+	for i := range matrix {
+		matrix[i] = memory[i*cols : (i+1)*cols]
+	}
+
+	return matrix, nil
 }
 
 // if matrix is not square, returns nil and error
