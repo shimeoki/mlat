@@ -356,6 +356,25 @@ func (m *Matrix) String() string {
 	return strings.Join(rows, "\n")
 }
 
+// Time complexity is O(n), where n is the number of rows.
+//
+// Does not modify original matrix.
+func ReplaceRow(m [][]float64, row []float64, index int) ([][]float64, error) {
+	rows, cols := GetRowsCols(m)
+	if rows == 0 {
+		return nil, NewError("replace row: invalid matrix")
+	}
+
+	if index < 0 || index >= rows {
+		return nil, NewError("replace row: invalid index")
+	}
+
+	n, _ := Malloc(rows, cols)
+	copy(n[index], row)
+
+	return n, nil
+}
+
 func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64) {
 	rows, cols := len(matrix), len(matrix[0])-1
 
