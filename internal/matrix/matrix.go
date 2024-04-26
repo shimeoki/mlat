@@ -281,7 +281,7 @@ func (m *Matrix) GetTranspose() (newMatrix [][]float64) {
 	transpose, memory, _ := Malloc(m.Cols, m.Rows)
 
 	for i := range m.Cols {
-		for _ = range m.Rows {
+		for range m.Rows {
 			transpose[i] = memory[(i * m.Rows) : (i+1)*m.Rows]
 		}
 	}
