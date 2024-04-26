@@ -260,6 +260,32 @@ func calcDet(matrix [][]float64) float64 {
 	}
 }
 
+func DeleteRow(m [][]float64, row int) ([][]float64, error) {
+	rows, cols := GetRowsCols(m)
+	if rows == 0 {
+		return nil, NewError("delete row: invalid matrix")
+	}
+
+	if row < 0 || row >= rows {
+		return nil, NewError("delete row: invalid row index")
+	}
+
+	if rows == 1 {
+		return make([][]float64, 0), nil
+	}
+
+	n, _ := Malloc(rows-1, cols)
+	for i := range n {
+		if i < row {
+			copy(n[i], m[i])
+		} else {
+			copy(n[i], m[i+1])
+		}
+	}
+
+	return n, nil
+}
+
 func deleteRowAndCol(matrix [][]float64, row, col int) (newMatrix [][]float64) {
 	rows, cols := len(matrix)-1, len(matrix[0])-1
 
