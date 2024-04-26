@@ -139,7 +139,7 @@ func makeRoots(augmented bool, cols int) []float64 {
 	}
 }
 
-// Allocate memory for matrix in single allocation.
+// Allocates memory for matrix in single allocation.
 // It is more efficient in terms of access speed.
 func Malloc(rows, cols int) ([][]float64, error) {
 	if rows <= 0 || cols <= 0 {
@@ -260,6 +260,9 @@ func calcDet(matrix [][]float64) float64 {
 	}
 }
 
+// Time complexity is O(n), where n is the number of rows.
+//
+// Does not modify original matrix.
 func DeleteRow(m [][]float64, row int) ([][]float64, error) {
 	rows, cols := GetRowsCols(m)
 	if rows == 0 {
@@ -286,6 +289,9 @@ func DeleteRow(m [][]float64, row int) ([][]float64, error) {
 	return n, nil
 }
 
+// Time complexity is O(n), where n is the number of rows.
+//
+// Does not modify original matrix.
 func DeleteCol(m [][]float64, col int) ([][]float64, error) {
 	rows, cols := GetRowsCols(m)
 	if cols == 0 {
@@ -308,6 +314,9 @@ func DeleteCol(m [][]float64, col int) ([][]float64, error) {
 	return n, nil
 }
 
+// Time complexity is O(n), where n is the number of rows.
+//
+// Does not modify original matrix.
 func DeleteRowAndCol(m [][]float64, row, col int) ([][]float64, error) {
 	rows, cols := GetRowsCols(m)
 	if rows == 0 {
