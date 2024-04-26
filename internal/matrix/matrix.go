@@ -50,18 +50,22 @@ func NewMatrix(data [][]float64, augmented bool) (*Matrix, error) {
 	return m, nil
 }
 
-func (m *Matrix) FillRandom(upper int) error {
-	if upper <= 0 {
-		return errors.New("upper limit is invalid")
+func FillRandom(m [][]float64, lower, upper float64) error {
+	if lower >= upper {
+		return NewError("fill random: lower >= upper")
 	}
 
-	for i := 0; i < m.Rows; i++ {
-		for j := 0; j < m.Cols; j++ {
-			m.Data[i][j] = rand.Float64() * float64(upper)
+	for i := range m {
+		for j := range m[i] {
+			m[i][j] = lower + upper*rand.Float64()
 		}
 	}
 
 	return nil
+}
+
+func (m *Matrix) FillRandom(lower, upper float64) error {
+	return FillRandom(m.Data, lower, upper)
 }
 
 func isSquare(augmented bool, rows, cols int) bool {
