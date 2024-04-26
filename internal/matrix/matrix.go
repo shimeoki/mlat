@@ -267,7 +267,7 @@ func DeleteRow(m [][]float64, row int) ([][]float64, error) {
 	}
 
 	if row < 0 || row >= rows {
-		return nil, NewError("delete row: invalid row index")
+		return nil, NewError("delete row: invalid row")
 	}
 
 	if rows == 1 {
@@ -275,12 +275,41 @@ func DeleteRow(m [][]float64, row int) ([][]float64, error) {
 	}
 
 	n, _ := Malloc(rows-1, cols)
-	for i := range m {
+	for i := range n {
 		if i < row {
 			copy(n[i], m[i])
 		} else {
 			copy(n[i], m[i+1])
 		}
+	}
+
+	return n, nil
+}
+
+func DeleteRowAndCol(m [][]float64, row, col int) ([][]float64, error) {
+	rows, cols := GetRowsCols(m)
+	if rows == 0 {
+		return nil, NewError("delete row and col: invalid matrix")
+	}
+
+	if row < 0 || row >= rows || col < 0 || col >= cols {
+		return nil, NewError("delete row and col: invalid row or col")
+	}
+
+	if rows == 1 && cols == 1 {
+		return make([][]float64, 0), nil
+	}
+
+	n, _ := Malloc(rows-1, cols-1)
+	for i := range n {
+		var index int
+		if i < row {
+			index = i
+		} else {
+			index = i + 1
+		}
+
+		copy(n[i], slices.Concat(m[index][:col], m[index][col+1:]))
 	}
 
 	return n, nil
@@ -319,7 +348,7 @@ func DeleteCol(m [][]float64, col int) ([][]float64, error) {
 	}
 
 	if col < 0 || col >= cols {
-		return nil, NewError("delete col: invalid col index")
+		return nil, NewError("delete col: invalid col")
 	}
 
 	if cols == 1 {
@@ -327,7 +356,7 @@ func DeleteCol(m [][]float64, col int) ([][]float64, error) {
 	}
 
 	n, _ := Malloc(rows, cols-1)
-	for i := range m {
+	for i := range n {
 		copy(n[i], slices.Concat(m[i][:col], m[i][col+1:]))
 	}
 
