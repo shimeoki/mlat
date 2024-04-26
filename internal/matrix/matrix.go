@@ -632,11 +632,11 @@ func (m *Matrix) Write(data [][]float64) error {
 }
 
 func (m *Matrix) WriteBlank(rows, cols int) error {
-	if rows <= 0 || cols <= 0 {
-		return NewError("write blank: rows or cols equal or less than zero")
+	n, err := Malloc(rows, cols)
+	if err != nil {
+		return err
 	}
 
-	n, _ := Malloc(rows, cols)
 	m.Data = n
 	m.Rows = rows
 	m.Cols = cols
