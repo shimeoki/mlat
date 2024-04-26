@@ -644,6 +644,6 @@ func (m *Matrix) WriteBlank(rows, cols int) error {
 	return nil
 }
 
-func (p *Matrix) Reset() {
-	p.WriteBlank(p.Rows, p.Cols)
+func (m *Matrix) Reset() {
+	m.WriteBlank(m.Rows, m.Cols)
 }
