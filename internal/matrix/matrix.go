@@ -268,16 +268,60 @@ func (m *Matrix) GetAdjugate() (newMatrix [][]float64) {
 	for i := range m.Rows {
 		adjugate[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
 		for j := range m.Cols {
-			cellValue := m.Data[i][j]
+			// sign := m.Data[i][j]
+			sign := 1.0
 			if (i+j)%2 != 0 {
-				cellValue = -cellValue
+				sign = -sign
 			}
 			matrix := deleteRowAndCol(m.Data, i, j)
-			adjugate[i][j] = cellValue * calcDet(matrix)
+			adjugate[i][j] = calcDet(matrix) * sign
 		}
 	}
 
 	return adjugate
+}
+
+func (m *Matrix) GetTranspose() (newMatrix [][]float64) {
+	transpose, memory, _ := Malloc[float64](m.Cols, m.Rows)
+
+	for i := range m.Cols {
+		for _ = range m.Rows {
+			transpose[i] = memory[(i * m.Rows) : (i+1)*m.Rows]
+		}
+	}
+
+	for i := range m.Rows {
+		for j := range m.Cols {
+			transpose[j][i] = m.Data[i][j]
+		}
+	}
+
+	return transpose
+}
+
+func (m *Matrix) GetInverse() (newMatrix [][]float64) {
+	if !m.Square {
+		return nil
+	}
+
+	if m.Determinants[0] == 0.0 {
+		m.Calculate()
+	}
+
+	if m.Determinants[0] == 0.0 {
+		return nil
+	}
+
+	adjugate, _ := NewMatrix(m.GetAdjugate(), m.Augmented)
+	inverse := adjugate.GetTranspose()
+
+	for i := range len(inverse) {
+		for j := range len(inverse[0]) {
+			inverse[i][j] /= m.Determinants[0]
+		}
+	}
+
+	return inverse
 }
 
 func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
