@@ -286,6 +286,28 @@ func DeleteRow(m [][]float64, row int) ([][]float64, error) {
 	return n, nil
 }
 
+func DeleteCol(m [][]float64, col int) ([][]float64, error) {
+	rows, cols := GetRowsCols(m)
+	if cols == 0 {
+		return nil, NewError("delete col: invalid matrix")
+	}
+
+	if col < 0 || col >= cols {
+		return nil, NewError("delete col: invalid col")
+	}
+
+	if cols == 1 {
+		return make([][]float64, 0), nil
+	}
+
+	n, _ := Malloc(rows, cols-1)
+	for i := range n {
+		copy(n[i], slices.Concat(m[i][:col], m[i][col+1:]))
+	}
+
+	return n, nil
+}
+
 func DeleteRowAndCol(m [][]float64, row, col int) ([][]float64, error) {
 	rows, cols := GetRowsCols(m)
 	if rows == 0 {
@@ -315,22 +337,6 @@ func DeleteRowAndCol(m [][]float64, row, col int) ([][]float64, error) {
 	return n, nil
 }
 
-func deleteRowAndCol(matrix [][]float64, row, col int) (newMatrix [][]float64) {
-	rows, cols := len(matrix)-1, len(matrix[0])-1
-
-	newMatrix, memory, _ := Malloc(rows, cols)
-	for i := range newMatrix {
-		newMatrix[i] = memory[(i * cols):((i + 1) * cols)]
-		if i < row {
-			copy(newMatrix[i], slices.Concat(matrix[i][:col], matrix[i][col+1:]))
-		} else {
-			copy(newMatrix[i], slices.Concat(matrix[i+1][:col], matrix[i+1][col+1:]))
-		}
-	}
-
-	return
-}
-
 func (m *Matrix) String() string {
 	rows := make([]string, m.Rows)
 
@@ -339,28 +345,6 @@ func (m *Matrix) String() string {
 	}
 
 	return strings.Join(rows, "\n")
-}
-
-func DeleteCol(m [][]float64, col int) ([][]float64, error) {
-	rows, cols := GetRowsCols(m)
-	if cols == 0 {
-		return nil, NewError("delete col: invalid matrix")
-	}
-
-	if col < 0 || col >= cols {
-		return nil, NewError("delete col: invalid col")
-	}
-
-	if cols == 1 {
-		return make([][]float64, 0), nil
-	}
-
-	n, _ := Malloc(rows, cols-1)
-	for i := range n {
-		copy(n[i], slices.Concat(m[i][:col], m[i][col+1:]))
-	}
-
-	return n, nil
 }
 
 func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64) {
