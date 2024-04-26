@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-type Number interface {
-	int | float64
-}
-
 type Matrix struct {
 	Data         [][]float64
 	Rows         int
@@ -97,12 +93,12 @@ func makeRoots(augmented bool, cols int) []float64 {
 //	for i := range matrix {
 //		matrix[i] = memory[(i * cols):((i + 1) * cols)]
 //	}
-func Malloc[number Number](rows, cols int) ([][]number, []number, error) {
+func Malloc(rows, cols int) ([][]float64, []float64, error) {
 	if rows <= 0 || cols <= 0 {
 		return nil, nil, errors.New("invalid row or column value")
 	}
 
-	return make([][]number, rows), make([]number, rows*cols), nil
+	return make([][]float64, rows), make([]float64, rows*cols), nil
 }
 
 // if matrix is not square, returns nil and error
@@ -150,16 +146,16 @@ func (m *Matrix) GetRoots() []float64 {
 	return m.Roots
 }
 
-func calcDets[number Number](matrix [][]number) []number {
+func calcDets(matrix [][]float64) []float64 {
 	cols := len(matrix[0])
 
-	chans := make([]chan number, cols)
-	dets := make([]number, cols)
+	chans := make([]chan float64, cols)
+	dets := make([]float64, cols)
 
 	for i := range cols {
-		chans[i] = make(chan number)
+		chans[i] = make(chan float64)
 
-		var newMatrix [][]number
+		var newMatrix [][]float64
 		if i == 0 {
 			newMatrix = deleteCol(matrix, cols-1)
 		} else {
@@ -178,7 +174,7 @@ func calcDets[number Number](matrix [][]number) []number {
 	return dets
 }
 
-func calcDet[number Number](matrix [][]number) number {
+func calcDet(matrix [][]float64) float64 {
 	switch dimension := len(matrix); dimension {
 	case 1:
 		return matrix[0][0]
@@ -193,7 +189,7 @@ func calcDet[number Number](matrix [][]number) number {
 			matrix[0][1]*matrix[1][0]*matrix[2][2] -
 			matrix[0][0]*matrix[1][2]*matrix[2][1]
 	default:
-		answer := number(0)
+		answer := .0
 
 		for i := range dimension {
 			value := matrix[i][0]
@@ -209,10 +205,10 @@ func calcDet[number Number](matrix [][]number) number {
 	}
 }
 
-func deleteRowAndCol[number Number](matrix [][]number, row, col int) (newMatrix [][]number) {
+func deleteRowAndCol(matrix [][]float64, row, col int) (newMatrix [][]float64) {
 	rows, cols := len(matrix)-1, len(matrix[0])-1
 
-	newMatrix, memory, _ := Malloc[number](rows, cols)
+	newMatrix, memory, _ := Malloc(rows, cols)
 	for i := range newMatrix {
 		newMatrix[i] = memory[(i * cols):((i + 1) * cols)]
 		if i < row {
@@ -235,10 +231,10 @@ func (m *Matrix) String() string {
 	return strings.Join(rows, "\n")
 }
 
-func deleteCol[number Number](matrix [][]number, col int) (newMatrix [][]number) {
+func deleteCol(matrix [][]float64, col int) (newMatrix [][]float64) {
 	rows, cols := len(matrix), len(matrix[0])-1
 
-	newMatrix, memory, _ := Malloc[number](rows, cols)
+	newMatrix, memory, _ := Malloc(rows, cols)
 	for i := range matrix {
 		newMatrix[i] = memory[(i * cols):((i + 1) * cols)]
 		copy(newMatrix[i], slices.Concat(matrix[i][:col], matrix[i][col+1:]))
@@ -247,10 +243,10 @@ func deleteCol[number Number](matrix [][]number, col int) (newMatrix [][]number)
 	return
 }
 
-func replaceColInAugmented[number Number](matrix [][]number, index int) (newMatrix [][]number) {
+func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64) {
 	rows, cols := len(matrix), len(matrix[0])-1
 
-	newMatrix, memory, _ := Malloc[number](rows, cols)
+	newMatrix, memory, _ := Malloc(rows, cols)
 	for i := range matrix {
 		newMatrix[i] = memory[(i * cols) : (i+1)*cols]
 		copy(newMatrix[i], slices.Concat(matrix[i][:index], matrix[i][cols:], matrix[i][index+1:cols]))
@@ -264,7 +260,7 @@ func (m *Matrix) GetAdjugate() (newMatrix [][]float64) {
 		return nil
 	}
 
-	adjugate, memory, _ := Malloc[float64](m.Rows, m.Cols)
+	adjugate, memory, _ := Malloc(m.Rows, m.Cols)
 	for i := range m.Rows {
 		adjugate[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
 		for j := range m.Cols {
@@ -282,7 +278,7 @@ func (m *Matrix) GetAdjugate() (newMatrix [][]float64) {
 }
 
 func (m *Matrix) GetTranspose() (newMatrix [][]float64) {
-	transpose, memory, _ := Malloc[float64](m.Cols, m.Rows)
+	transpose, memory, _ := Malloc(m.Cols, m.Rows)
 
 	for i := range m.Cols {
 		for _ = range m.Rows {
@@ -330,7 +326,7 @@ func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 	}
 
 	rows, cols := m.Rows, matrix.Cols
-	newMatrix, memory, _ := Malloc[float64](rows, cols)
+	newMatrix, memory, _ := Malloc(rows, cols)
 	for i := range rows {
 		newMatrix[i] = memory[i*cols : (i+1)*cols]
 		for j := range cols {
@@ -351,7 +347,7 @@ func (m *Matrix) AddRow(index int) {
 	}
 
 	m.Rows++
-	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
+	matrix, memory, _ := Malloc(m.Rows, m.Cols)
 	for i := range matrix {
 		matrix[i] = memory[(i * m.Cols):((i + 1) * m.Cols)]
 		if i < index {
@@ -370,7 +366,7 @@ func (m *Matrix) AddCol(index int) {
 	}
 
 	m.Cols++
-	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
+	matrix, memory, _ := Malloc(m.Rows, m.Cols)
 	for i := range matrix {
 		matrix[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
 		copy(
@@ -391,7 +387,7 @@ func (m *Matrix) ExtendRows(rows int) {
 	}
 
 	m.Rows += rows
-	matrix, memory, _ := Malloc[float64](rows, m.Cols)
+	matrix, memory, _ := Malloc(rows, m.Cols)
 	for i := range matrix {
 		matrix[i] = memory[i*m.Cols : (i+1)*m.Cols]
 	}
@@ -405,7 +401,7 @@ func (m *Matrix) ExtendCols(cols int) {
 	}
 
 	m.Cols += cols
-	matrix, memory, _ := Malloc[float64](m.Rows, m.Cols)
+	matrix, memory, _ := Malloc(m.Rows, m.Cols)
 	for i := range matrix {
 		matrix[i] = memory[i*m.Cols : (i+1)*m.Cols]
 		copy(matrix[i], m.Data[i])
@@ -463,7 +459,7 @@ func (m *Matrix) Write(data [][]float64) error {
 		return errors.New("error: data is empty")
 	}
 
-	matrix, memory, _ := Malloc[float64](rows, cols)
+	matrix, memory, _ := Malloc(rows, cols)
 	for i := 0; i < rows; i++ {
 		if len(data[i]) != cols {
 			return errors.New("error: data is not rectangle-shaped")
@@ -485,7 +481,7 @@ func (m *Matrix) WriteBlank(rows, cols int) error {
 		return errors.New("error: rows or cols equal or less than zero")
 	}
 
-	matrix, memory, _ := Malloc[float64](rows, cols)
+	matrix, memory, _ := Malloc(rows, cols)
 	for i := 0; i < rows; i++ {
 		matrix[i] = memory[(i * cols):((i + 1) * cols)]
 	}

@@ -23,7 +23,7 @@ func ReadSlow(path string) ([][]float64, error) {
 	}
 	defer file.Close()
 
-	matrix, memory, _ := Malloc[float64](rows, cols)
+	matrix, memory, _ := Malloc(rows, cols)
 	scanner := bufio.NewScanner(file)
 	for i := range rows {
 		matrix[i] = memory[(i * cols) : (i+1)*cols]
@@ -37,7 +37,7 @@ func ReadSlow(path string) ([][]float64, error) {
 	return matrix, nil
 }
 
-func Write[number Number](path string, matrix [][]number) error {
+func Write(path string, matrix [][]float64) error {
 	file, err := os.Create(path)
 	if err != nil {
 		return err
@@ -98,13 +98,13 @@ func getRowsCols(path string) (int, int, error) {
 	return rows, cols, nil
 }
 
-func ArrayToString[number Number](array []number, separator string) string {
+func ArrayToString(array []float64, separator string) string {
 	return strings.Trim(
 		strings.Replace(fmt.Sprint(array), " ", separator, -1), "[]",
 	)
 }
 
-func MatrixToString[number Number](matrix [][]number, separator string) string {
+func MatrixToString(matrix [][]float64, separator string) string {
 	if matrix == nil {
 		return ""
 	} else if len(matrix) == 0 {
