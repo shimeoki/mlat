@@ -68,6 +68,53 @@ func (m *Matrix) FillRandom(lower, upper float64) error {
 	return FillRandom(m.Data, lower, upper)
 }
 
+// Time complexity is O(n), where n is the number of rows.
+//
+// Returns (0, 0) if m is not valid.
+func GetRowsCols(m [][]float64) (rows, cols int) {
+	rows, cols = 0, 0
+
+	for i := range m {
+		rows++
+
+		colsInRow := len(m[i])
+
+		if cols == 0 {
+			if colsInRow == 0 {
+				return 0, 0
+			}
+
+			cols = colsInRow
+			continue
+		}
+
+		if cols != colsInRow {
+			return 0, 0
+		}
+	}
+
+	return
+}
+
+func IsRectangle(m [][]float64) bool {
+	if rows, _ := GetRowsCols(m); rows == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
+func IsSquare(m [][]float64) bool {
+	rows, cols := GetRowsCols(m)
+	if rows == 0 {
+		return false
+	} else if rows != cols {
+		return false
+	} else {
+		return true
+	}
+}
+
 func isSquare(augmented bool, rows, cols int) bool {
 	if augmented {
 		return rows == (cols - 1)
