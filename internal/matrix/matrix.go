@@ -181,14 +181,13 @@ func calcDet(matrix [][]float64) float64 {
 	}
 }
 
-func (m *Matrix) DeleteRow(index int) error {
+func (m *Matrix) NewDeleteRow(index int) (*Matrix, error) {
 	if index < 0 || index >= m.Rows {
-		return NewError("delete row: invalid row")
+		return nil, NewError("delete row: invalid row")
 	}
 
 	if m.Rows == 1 {
-		m.Data = make([][]float64, 0)
-		return nil
+		return NewBlankMatrix(0, 0, m.Augmented)
 	}
 
 	n, _ := Malloc(m.Rows-1, m.Cols)
@@ -200,7 +199,16 @@ func (m *Matrix) DeleteRow(index int) error {
 		}
 	}
 
-	m.Data = n
+	return NewMatrix(n, m.Augmented)
+}
+
+func (m *Matrix) DeleteRow(index int) error {
+	n, err := m.NewDeleteRow(index)
+	if err != nil {
+		return err
+	}
+
+	m.Data = n.Data
 	return nil
 }
 

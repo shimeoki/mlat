@@ -1,6 +1,8 @@
 package matrix
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 func FillRandom(m [][]float64, lower, upper float64) error {
 	if lower >= upper {
