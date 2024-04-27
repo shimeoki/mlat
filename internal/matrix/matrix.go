@@ -379,7 +379,7 @@ func (m *Matrix) Transpose() error {
 }
 
 func (m *Matrix) NewAdjugate() (*Matrix, error) {
-	cofactor, err := m.NewCofactor()
+	cofactor, err := m.NewComatrix()
 	if err != nil {
 		return nil, err
 	}
