@@ -105,8 +105,7 @@ func IsRectangle(m [][]float64) bool {
 }
 
 func IsSquare(m [][]float64) bool {
-	rows, cols := GetRowsCols(m)
-	if rows == 0 {
+	if rows, cols := GetRowsCols(m); rows == 0 {
 		return false
 	} else if rows != cols {
 		return false
