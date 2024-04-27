@@ -450,6 +450,16 @@ func (m *Matrix) NewMultiply(other *Matrix) (*Matrix, error) {
 	return NewMatrix(n, m.Augmented)
 }
 
+func (m *Matrix) Multiply(other *Matrix) error {
+	n, err := m.NewMultiply(other)
+	if err != nil {
+		return err
+	}
+
+	m.Copy(n)
+	return nil
+}
+
 func (m *Matrix) AddRow(index int) {
 	if index < 0 || index >= m.Rows {
 		return
