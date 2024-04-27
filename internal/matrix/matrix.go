@@ -387,6 +387,16 @@ func (m *Matrix) NewAdjugate() (*Matrix, error) {
 	return cofactor.NewTranspose()
 }
 
+func (m *Matrix) Adjugate() error {
+	n, err := m.NewAdjugate()
+	if err != nil {
+		return err
+	}
+
+	m.Copy(n)
+	return nil
+}
+
 func (m *Matrix) GetInverse() (newMatrix [][]float64) {
 	if !m.Square {
 		return nil
