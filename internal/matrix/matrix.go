@@ -150,7 +150,7 @@ func calcDets(matrix [][]float64) []float64 {
 	return dets
 }
 
-func (m *Matrix) CalcDet() float64 {
+func (m *Matrix) Det() float64 {
 	if !m.Square {
 		return .0
 	}
@@ -178,7 +178,7 @@ func (m *Matrix) CalcDet() float64 {
 			}
 
 			n, _ := m.NewDeleteRowAndCol(i, 0)
-			answer += value * n.CalcDet()
+			answer += value * n.Det()
 		}
 
 		return answer
@@ -326,7 +326,7 @@ func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64
 	return
 }
 
-func (m *Matrix) GetCofactor() (*Matrix, error) {
+func (m *Matrix) NewCofactor() (*Matrix, error) {
 	if !m.Square {
 		return nil, NewError("get adjugate: matrix is not a square")
 	}
@@ -335,7 +335,7 @@ func (m *Matrix) GetCofactor() (*Matrix, error) {
 	for i := range m.Rows {
 		for j := range m.Cols {
 			n, _ := m.NewDeleteRowAndCol(i, j)
-			value := n.CalcDet()
+			value := n.Det()
 			if (i+j)%2 != 0 {
 				value = -value
 			}
