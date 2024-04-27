@@ -397,9 +397,9 @@ func (m *Matrix) Adjugate() error {
 	return nil
 }
 
-func (m *Matrix) GetInverse() (newMatrix [][]float64) {
+func (m *Matrix) NewInverse() (*Matrix, error) {
 	if !m.Square {
-		return nil
+		return nil, NewError("inverse: matrix is not a square")
 	}
 
 	if m.Determinants[0] == 0.0 {
@@ -407,19 +407,17 @@ func (m *Matrix) GetInverse() (newMatrix [][]float64) {
 	}
 
 	if m.Determinants[0] == 0.0 {
-		return nil
+		return nil, NewError("inverse: determinant is zero")
 	}
 
-	adjugate, _ := NewMatrix(m.GetAdjugate(), m.Augmented)
-	inverse := adjugate.GetTranspose()
-
-	for i := range len(inverse) {
-		for j := range len(inverse[0]) {
-			inverse[i][j] /= m.Determinants[0]
+	inverse, _ := m.NewAdjugate()
+	for i := range inverse.Rows {
+		for j := range inverse.Cols {
+			inverse.Data[i][j] /= m.Determinants[0]
 		}
 	}
 
-	return inverse
+	return inverse, nil
 }
 
 func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
