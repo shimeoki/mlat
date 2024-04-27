@@ -347,6 +347,16 @@ func (m *Matrix) NewCofactor() (*Matrix, error) {
 	return NewMatrix(cofactor, false)
 }
 
+func (m *Matrix) Cofactor() error {
+	n, err := m.NewCofactor()
+	if err != nil {
+		return err
+	}
+
+	m.Copy(n)
+	return nil
+}
+
 func (m *Matrix) NewTranspose() (*Matrix, error) {
 	n, _ := Malloc(m.Cols, m.Rows)
 	for i := range m.Rows {
