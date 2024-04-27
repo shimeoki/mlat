@@ -302,36 +302,28 @@ func (m *Matrix) DeleteCol(index int) error {
 	return nil
 }
 
-// Time complexity is O(n), where n is the number of rows.
-//
-// Does not modify original matrix.
-func DeleteRowAndCol(m [][]float64, row, col int) ([][]float64, error) {
-	rows, cols := GetRowsCols(m)
-	if rows == 0 {
-		return nil, NewError("delete row and col: invalid matrix")
+func (m *Matrix) DeleteRowAndCol(row, col int) error {
+	if row < 0 || row >= m.Rows || col < 0 || col >= m.Cols {
+		return NewError("delete row and col: invalid row or col")
 	}
 
-	if row < 0 || row >= rows || col < 0 || col >= cols {
-		return nil, NewError("delete row and col: invalid row or col")
+	if m.Rows == 1 && m.Cols == 1 {
+		m.Data = make([][]float64, 0)
+		return nil
 	}
 
-	if rows == 1 && cols == 1 {
-		return make([][]float64, 0), nil
-	}
-
-	n, _ := Malloc(rows-1, cols-1)
+	n, _ := Malloc(m.Rows-1, m.Cols-1)
 	for i := range n {
-		var index int
-		if i < row {
-			index = i
-		} else {
-			index = i + 1
+		index := i
+		if i >= row {
+			index++
 		}
 
-		copy(n[i], slices.Concat(m[index][:col], m[index][col+1:]))
+		copy(n[i], slices.Concat(m.Data[index][:col], m.Data[index][col+1:]))
 	}
 
-	return n, nil
+	m.Data = n
+	return nil
 }
 
 func (m *Matrix) String() string {
