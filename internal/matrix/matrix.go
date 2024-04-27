@@ -150,31 +150,35 @@ func calcDets(matrix [][]float64) []float64 {
 	return dets
 }
 
-func calcDet(matrix [][]float64) float64 {
-	switch dimension := len(matrix); dimension {
+func (m *Matrix) CalcDet() float64 {
+	if !m.Square {
+		return .0
+	}
+
+	switch m.Rows {
 	case 1:
-		return matrix[0][0]
+		return m.Data[0][0]
 	case 2:
-		return matrix[0][0]*matrix[1][1] -
-			matrix[0][1]*matrix[1][0]
+		return m.Data[0][0]*m.Data[1][1] -
+			m.Data[0][1]*m.Data[1][0]
 	case 3:
-		return matrix[0][0]*matrix[1][1]*matrix[2][2] +
-			matrix[0][1]*matrix[1][2]*matrix[2][0] +
-			matrix[0][2]*matrix[1][0]*matrix[2][1] -
-			matrix[0][2]*matrix[1][1]*matrix[2][0] -
-			matrix[0][1]*matrix[1][0]*matrix[2][2] -
-			matrix[0][0]*matrix[1][2]*matrix[2][1]
+		return m.Data[0][0]*m.Data[1][1]*m.Data[2][2] +
+			m.Data[0][1]*m.Data[1][2]*m.Data[2][0] +
+			m.Data[0][2]*m.Data[1][0]*m.Data[2][1] -
+			m.Data[0][2]*m.Data[1][1]*m.Data[2][0] -
+			m.Data[0][1]*m.Data[1][0]*m.Data[2][2] -
+			m.Data[0][0]*m.Data[1][2]*m.Data[2][1]
 	default:
 		answer := .0
 
-		for i := range dimension {
-			value := matrix[i][0]
+		for i, row := range m.Data {
+			value := row[0]
 			if i%2 != 0 {
 				value = -value
 			}
 
-			rewritedMatrix := deleteRowAndCol(matrix, i, 0)
-			answer += value * calcDet(rewritedMatrix)
+			n, _ := m.NewDeleteRowAndCol(i, 0)
+			answer += value * n.CalcDet()
 		}
 
 		return answer
