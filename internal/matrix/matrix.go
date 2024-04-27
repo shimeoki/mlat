@@ -364,12 +364,7 @@ func (m *Matrix) Transpose() error {
 		return err
 	}
 
-	m.Data = n.Data
-	m.Rows = n.Rows
-	m.Cols = n.Cols
-	m.Square = n.Square
-	m.Augmented = n.Augmented
-
+	m.Copy(n)
 	return nil
 }
 
