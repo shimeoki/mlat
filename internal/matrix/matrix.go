@@ -3,7 +3,6 @@ package matrix
 import (
 	"errors"
 	"fmt"
-	"math/rand"
 	"slices"
 	"strings"
 )
