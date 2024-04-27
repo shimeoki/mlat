@@ -420,6 +420,16 @@ func (m *Matrix) NewInverse() (*Matrix, error) {
 	return inverse, nil
 }
 
+func (m *Matrix) Inverse() error {
+	n, err := m.NewInverse()
+	if err != nil {
+		return err
+	}
+
+	m.Copy(n)
+	return nil
+}
+
 func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
 	if m.Cols != matrix.Rows {
 		return nil
