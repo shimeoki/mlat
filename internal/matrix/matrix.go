@@ -283,29 +283,23 @@ func (m *Matrix) DeleteRow(index int) error {
 	return nil
 }
 
-// Time complexity is O(n), where n is the number of rows.
-//
-// Does not modify original matrix.
-func DeleteCol(m [][]float64, col int) ([][]float64, error) {
-	rows, cols := GetRowsCols(m)
-	if cols == 0 {
-		return nil, NewError("delete col: invalid matrix")
+func (m *Matrix) DeleteCol(index int) error {
+	if index < 0 || index >= m.Cols {
+		return NewError("delete col: invalid col")
 	}
 
-	if col < 0 || col >= cols {
-		return nil, NewError("delete col: invalid col")
+	if m.Cols == 1 {
+		m.Data = make([][]float64, 0)
+		return nil
 	}
 
-	if cols == 1 {
-		return make([][]float64, 0), nil
+	n, _ := Malloc(m.Rows, m.Cols-1)
+	for i, row := range n {
+		copy(row, slices.Concat(m.Data[i][:index], m.Data[i][index+1:]))
 	}
 
-	n, _ := Malloc(rows, cols-1)
-	for i := range n {
-		copy(n[i], slices.Concat(m[i][:col], m[i][col+1:]))
-	}
-
-	return n, nil
+	m.Data = n
+	return nil
 }
 
 // Time complexity is O(n), where n is the number of rows.
