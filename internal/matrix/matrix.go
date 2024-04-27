@@ -336,23 +336,13 @@ func (m *Matrix) String() string {
 	return strings.Join(rows, "\n")
 }
 
-// Time complexity is O(n), where n is the number of rows.
-//
-// Does not modify original matrix.
-func ReplaceRow(m [][]float64, row []float64, index int) ([][]float64, error) {
-	rows, cols := GetRowsCols(m)
-	if rows == 0 {
-		return nil, NewError("replace row: invalid matrix")
+func (m *Matrix) ReplaceRow(row []float64, index int) error {
+	if index < 0 || index >= m.Rows {
+		return NewError("replace row: invalid index")
 	}
 
-	if index < 0 || index >= rows {
-		return nil, NewError("replace row: invalid index")
-	}
-
-	n, _ := Malloc(rows, cols)
-	copy(n[index], row)
-
-	return n, nil
+	copy(m.Data[index], row)
+	return nil
 }
 
 // Time complexity is O(n), where n is the number of rows.
