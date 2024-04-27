@@ -239,14 +239,13 @@ func (m *Matrix) DeleteCol(index int) error {
 	return nil
 }
 
-func (m *Matrix) DeleteRowAndCol(row, col int) error {
+func (m *Matrix) NewDeleteRowAndCol(row, col int) (*Matrix, error) {
 	if row < 0 || row >= m.Rows || col < 0 || col >= m.Cols {
-		return NewError("delete row and col: invalid row or col")
+		return nil, NewError("delete row and col: invalid row or col")
 	}
 
 	if m.Rows == 1 && m.Cols == 1 {
-		m.Data = make([][]float64, 0)
-		return nil
+		return NewBlankMatrix(0, 0, m.Augmented)
 	}
 
 	n, _ := Malloc(m.Rows-1, m.Cols-1)
@@ -259,7 +258,16 @@ func (m *Matrix) DeleteRowAndCol(row, col int) error {
 		copy(n[i], slices.Concat(m.Data[index][:col], m.Data[index][col+1:]))
 	}
 
-	m.Data = n
+	return NewMatrix(n, m.Augmented)
+}
+
+func (m *Matrix) DeleteRowAndCol(row, col int) error {
+	n, err := m.NewDeleteRowAndCol(row, col)
+	if err != nil {
+		return err
+	}
+
+	m.Data = n.Data
 	return nil
 }
 
