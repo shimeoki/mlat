@@ -345,27 +345,20 @@ func (m *Matrix) ReplaceRow(row []float64, index int) error {
 	return nil
 }
 
-// Time complexity is O(n), where n is the number of rows.
-//
-// Does not modify original matrix.
-func ReplaceCol(m [][]float64, col []float64, index int) ([][]float64, error) {
-	rows, cols := GetRowsCols(m)
-	if rows == 0 {
-		return nil, NewError("replace col: invalid matrix")
+func (m *Matrix) ReplaceCol(col []float64, index int) error {
+	if index < 0 || index >= m.Cols {
+		return NewError("replace col: invalid index")
 	}
 
-	if index < 0 || index >= rows {
-		return nil, NewError("replace col: invalid index")
+	if len(col) != m.Rows {
+		return NewError("replace col: invalid col")
 	}
 
-	n, _ := Malloc(rows, cols)
-	for i := range n {
-		row := slices.Clone(n[i])
-		row[index] = col[i]
-		copy(n[i], row)
+	for i, value := range col {
+		m.Data[i][index] = value
 	}
 
-	return n, nil
+	return nil
 }
 
 func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64) {
