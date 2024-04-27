@@ -341,6 +341,10 @@ func (m *Matrix) ReplaceRow(row []float64, index int) error {
 		return NewError("replace row: invalid index")
 	}
 
+	if len(row) != m.Cols {
+		return NewError("replace col: invalid row")
+	}
+
 	copy(m.Data[index], row)
 	return nil
 }
