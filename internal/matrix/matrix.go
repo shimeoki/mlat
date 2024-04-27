@@ -326,6 +326,20 @@ func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64
 	return
 }
 
+func (m *Matrix) Cofactor(row, col int) (float64, error) {
+	if row < 0 || row >= m.Rows || col < 0 || col >= m.Cols {
+		return .0, NewError("cofactor: invalid row or col")
+	}
+
+	n, _ := m.NewDeleteRowAndCol(row, col)
+	value := n.Det()
+	if (row+col)%2 != 0 {
+		value = -value
+	}
+
+	return value, nil
+}
+
 func (m *Matrix) NewComatrix() (*Matrix, error) {
 	if !m.Square {
 		return nil, NewError("get adjugate: matrix is not a square")
