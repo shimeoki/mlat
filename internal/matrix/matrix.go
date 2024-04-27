@@ -430,25 +430,24 @@ func (m *Matrix) Inverse() error {
 	return nil
 }
 
-func (m *Matrix) Multiply(matrix *Matrix) (newMatrix [][]float64) {
-	if m.Cols != matrix.Rows {
-		return nil
+func (m *Matrix) NewMultiply(other *Matrix) (*Matrix, error) {
+	if m.Cols != other.Rows {
+		return nil, NewError("multiply: other matrix rows are not equal to current cols")
 	}
 
-	rows, cols := m.Rows, matrix.Cols
-	newMatrix, memory, _ := Malloc(rows, cols)
-	for i := range rows {
-		newMatrix[i] = memory[i*cols : (i+1)*cols]
-		for j := range cols {
-			cellValue := 0.0
+	n, _ := Malloc(m.Rows, other.Cols)
+	for i := range m.Rows {
+		for j := range other.Cols {
+			value := .0
 			for k := range m.Cols {
-				cellValue += m.Data[i][k] * matrix.Data[k][j]
+				value += m.Data[i][k] * other.Data[k][j]
 			}
-			newMatrix[i][j] = cellValue
+
+			n[i][j] = value
 		}
 	}
 
-	return newMatrix
+	return NewMatrix(n, m.Augmented)
 }
 
 func (m *Matrix) AddRow(index int) {
