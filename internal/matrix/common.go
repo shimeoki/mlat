@@ -66,9 +66,15 @@ func IsSquare(m [][]float64) bool {
 
 // Allocates memory for matrix in single allocation.
 // It is more efficient in terms of access speed.
+//
+// Returns empty matrix if rows or cols are equal to zero.
 func Malloc(rows, cols int) ([][]float64, error) {
-	if rows <= 0 || cols <= 0 {
-		return nil, NewError("malloc: rows or cols equal or less than zero")
+	if rows < 0 || cols < 0 {
+		return nil, NewError("malloc: rows or cols are less than zero")
+	}
+
+	if rows == 0 || cols == 0 {
+		return make([][]float64, 0), nil
 	}
 
 	matrix := make([][]float64, rows)
