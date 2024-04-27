@@ -570,3 +570,13 @@ func (m *Matrix) WriteBlank(rows, cols int) error {
 func (m *Matrix) Reset() {
 	m.WriteBlank(m.Rows, m.Cols)
 }
+
+func (m *Matrix) Copy(src *Matrix) {
+	m.Data = src.Data
+	m.Rows = src.Rows
+	m.Cols = src.Cols
+	m.Augmented = src.Augmented
+	m.Square = src.Square
+	m.Determinants = src.Determinants
+	m.Roots = src.Roots
+}
