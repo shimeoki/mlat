@@ -358,6 +358,21 @@ func (m *Matrix) NewTranspose() (*Matrix, error) {
 	return NewMatrix(n, m.Augmented)
 }
 
+func (m *Matrix) Transpose() error {
+	n, err := m.NewTranspose()
+	if err != nil {
+		return err
+	}
+
+	m.Data = n.Data
+	m.Rows = n.Rows
+	m.Cols = n.Cols
+	m.Square = n.Square
+	m.Augmented = n.Augmented
+
+	return nil
+}
+
 func (m *Matrix) GetInverse() (newMatrix [][]float64) {
 	if !m.Square {
 		return nil
