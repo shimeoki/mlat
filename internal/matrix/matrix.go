@@ -342,19 +342,13 @@ func (m *Matrix) Cofactor(row, col int) (float64, error) {
 
 func (m *Matrix) NewComatrix() (*Matrix, error) {
 	if !m.Square {
-		return nil, NewError("get adjugate: matrix is not a square")
+		return nil, NewError("comatrix: matrix is not a square")
 	}
 
 	cofactor, _ := Malloc(m.Rows, m.Cols)
 	for i := range m.Rows {
 		for j := range m.Cols {
-			n, _ := m.NewDeleteRowAndCol(i, j)
-			value := n.Det()
-			if (i+j)%2 != 0 {
-				value = -value
-			}
-
-			cofactor[i][j] = value
+			cofactor[i][j], _ = m.Cofactor(i, j)
 		}
 	}
 
