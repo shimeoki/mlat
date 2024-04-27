@@ -326,26 +326,25 @@ func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64
 	return
 }
 
-func (m *Matrix) GetAdjugate() (newMatrix [][]float64) {
+func (m *Matrix) GetCofactor() (*Matrix, error) {
 	if !m.Square {
-		return nil
+		return nil, NewError("get adjugate: matrix is not a square")
 	}
 
-	adjugate, memory, _ := Malloc(m.Rows, m.Cols)
+	cofactor, _ := Malloc(m.Rows, m.Cols)
 	for i := range m.Rows {
-		adjugate[i] = memory[(i * m.Cols) : (i+1)*m.Cols]
 		for j := range m.Cols {
-			// sign := m.Data[i][j]
-			sign := 1.0
+			n, _ := m.NewDeleteRowAndCol(i, j)
+			value := n.CalcDet()
 			if (i+j)%2 != 0 {
-				sign = -sign
+				value = -value
 			}
-			matrix := deleteRowAndCol(m.Data, i, j)
-			adjugate[i][j] = calcDet(matrix) * sign
+
+			cofactor[i][j] = value
 		}
 	}
 
-	return adjugate
+	return NewMatrix(cofactor, false)
 }
 
 func (m *Matrix) GetTranspose() (newMatrix [][]float64) {
