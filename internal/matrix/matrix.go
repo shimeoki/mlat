@@ -326,7 +326,7 @@ func replaceColInAugmented(matrix [][]float64, index int) (newMatrix [][]float64
 	return
 }
 
-func (m *Matrix) NewCofactor() (*Matrix, error) {
+func (m *Matrix) NewComatrix() (*Matrix, error) {
 	if !m.Square {
 		return nil, NewError("get adjugate: matrix is not a square")
 	}
@@ -347,8 +347,8 @@ func (m *Matrix) NewCofactor() (*Matrix, error) {
 	return NewMatrix(cofactor, false)
 }
 
-func (m *Matrix) Cofactor() error {
-	n, err := m.NewCofactor()
+func (m *Matrix) Comatrix() error {
+	n, err := m.NewComatrix()
 	if err != nil {
 		return err
 	}
