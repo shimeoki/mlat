@@ -347,22 +347,15 @@ func (m *Matrix) NewCofactor() (*Matrix, error) {
 	return NewMatrix(cofactor, false)
 }
 
-func (m *Matrix) GetTranspose() (newMatrix [][]float64) {
-	transpose, memory, _ := Malloc(m.Cols, m.Rows)
-
-	for i := range m.Cols {
-		for range m.Rows {
-			transpose[i] = memory[(i * m.Rows) : (i+1)*m.Rows]
-		}
-	}
-
+func (m *Matrix) NewTranspose() (*Matrix, error) {
+	n, _ := Malloc(m.Cols, m.Rows)
 	for i := range m.Rows {
 		for j := range m.Cols {
-			transpose[j][i] = m.Data[i][j]
+			n[j][i] = m.Data[i][j]
 		}
 	}
 
-	return transpose
+	return NewMatrix(n, m.Augmented)
 }
 
 func (m *Matrix) GetInverse() (newMatrix [][]float64) {
